@@ -7,18 +7,24 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static(path.join(__dirname, "public"))); // serve index.html etc.
+// Serve frontend
+app.use(express.static(path.join(__dirname, "public")));
 
-// socket.io handlers here...
+// Socket.IO example
 io.on("connection", (socket) => {
   console.log("Player connected:", socket.id);
-  // your game logic...
+
+  socket.on("disconnect", () => {
+    console.log("Player disconnected:", socket.id);
+  });
 });
 
-const PORT = process.env.PORT || 3000;  // ✅ required for Railway
+// ❌ Do NOT hardcode 8080
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
+
 
 
 const rooms = {};          // roomId -> { players: [{id,name}], history: [], turnIndex, lastLetter, started }
