@@ -1,0 +1,107 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  width: 500px;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  margin-bottom: 20px;
+}
+
+header h1 {
+  text-align: center;
+  color: #fff;
+  margin-bottom: 40px;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+}
+
+input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #0072ff;
+  color: white;
+  cursor: pointer;
+  font-size: 1em;
+  margin-right: 5px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #00c6ff;
+}
+
+.giveup {
+  background: #ff4b5c;
+}
+
+.giveup:hover {
+  background: #ff6f81;
+}
+
+.message {
+  color: #d32f2f;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  background: #f0f0f0;
+  margin-bottom: 5px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+/* Hide inputs and buttons until game starts */
+#countryInput, .buttons {
+  display: none;
+}
+
+/* Winner modal */
+#winnerModal {
+  display: none;
+  position: fixed;
+  top:0; left:0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+#winnerModal .modal-content {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}

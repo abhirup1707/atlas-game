@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Atlas Multiplayer Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <h1>🌍 Atlas Multiplayer Game</h1>
+    </header>
+
+    <!-- Lobby -->
+    <div id="lobby" class="card">
+      <input id="playerName" placeholder="Enter Your Name">
+      <button onclick="createRoom()">Create Room</button>
+      <input id="roomIdInput" placeholder="Room ID">
+      <button onclick="joinRoom()">Join Room</button>
+    </div>
+
+    <!-- Game Area -->
+    <div id="game" class="card" style="display:none;">
+      <h2 id="roomTitle">Room: </h2>
+      <p id="turnInfo"></p>
+
+      <!-- Leader sees this -->
+      <button id="startGameBtn" style="display:none;" onclick="startGame()">Start Game</button>
+
+      <input id="countryInput" placeholder="Enter Place Name">
+      <div class="buttons">
+        <button onclick="submitCountry()">Submit</button>
+        <button onclick="giveUp()" class="giveup">Give Up</button>
+      </div>
+
+      <p id="message" class="message"></p>
+
+      <h3>History</h3>
+      <ul id="history"></ul>
+
+      <h3>Players</h3>
+      <ul id="playersList"></ul>
+    </div>
+
+    <!-- Winner Modal -->
+    
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
