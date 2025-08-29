@@ -6,7 +6,11 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const PORT = process.env.PORT || 3011;
+const PORT = process.env.PORT || 3008;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 
 app.use(express.static("public"));
 
@@ -181,4 +185,4 @@ io.on("connection", (socket) => {
   }
 });
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
