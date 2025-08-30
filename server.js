@@ -1,3 +1,4 @@
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -7,28 +8,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Serve frontend
 app.use(express.static(path.join(__dirname, "public")));
 
-// Socket.IO example
-io.on("connection", (socket) => {
-  console.log("Player connected:", socket.id);
-
-  socket.on("disconnect", () => {
-    console.log("Player disconnected:", socket.id);
-  });
-});
-
-// ❌ Do NOT hardcode 8080
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
-
-
-
-const rooms = {};          // roomId -> { players: [{id,name}], history: [], turnIndex, lastLetter, started }
-const turnTimeouts = {};   // roomId -> timeoutId
+const rooms = {};        // roomId -> room data
+const turnTimeouts = {}; // roomId -> timeout id
 
 io.on("connection", (socket) => {
   console.log("Player connected:", socket.id);
@@ -56,22 +39,23 @@ io.on("connection", (socket) => {
       return;
     }
 
-    room.players.push({ id: socket.id, name: playerName });
+    const newPlayer = { id: socket.id, name: playerName, active: true };
+    room.players.push(newPlayer);
     socket.join(roomId);
 
-    // Send initial state to joining player
+    // Send full game state to the new player
     socket.emit("initState", {
       history: room.history,
       players: room.players,
       turnIndex: room.turnIndex,
       lastLetter: room.lastLetter,
-      started: room.started,
+      started: room.started && room.players.includes(newPlayer), // only true if player is in this round
     });
 
+    // Notify all players (including new player) about updated players
     io.to(roomId).emit("updatePlayers", room.players);
 
-    // If game started, notify the current turn player
-    if (room.started) startPlayerTurn(roomId);
+    console.log(`${playerName} joined room ${roomId}`);
   });
 
   // --- START GAME ---
@@ -82,8 +66,8 @@ io.on("connection", (socket) => {
     room.started = true;
     room.turnIndex = 0;
     room.lastLetter = null;
-    io.to(roomId).emit("gameStarted");
 
+    io.to(roomId).emit("gameStarted");
     startPlayerTurn(roomId);
   });
 
@@ -116,6 +100,7 @@ io.on("connection", (socket) => {
 
     room.players = room.players.filter(p => p.name !== name);
     io.to(roomId).emit("updatePlayers", room.players);
+
     checkGameOver(roomId);
   });
 
@@ -126,6 +111,7 @@ io.on("connection", (socket) => {
 
     room.players = room.players.filter(p => p.id !== socket.id);
     io.to(roomId).emit("updatePlayers", room.players);
+
     checkGameOver(roomId);
   });
 
@@ -141,6 +127,7 @@ io.on("connection", (socket) => {
 
     io.to(roomId).emit("gameStarted");
     io.to(roomId).emit("updateHistory", room.history);
+
     startPlayerTurn(roomId);
   });
 
@@ -157,22 +144,25 @@ io.on("connection", (socket) => {
     }
   });
 
-  // --- HELPER FUNCTIONS ---
+  // --- HELPERS ---
   function startPlayerTurn(roomId) {
     const room = rooms[roomId];
     if (!room || room.players.length === 0) return;
 
     const currentPlayer = room.players[room.turnIndex];
     io.to(currentPlayer.id).emit("yourTurn", room.lastLetter);
-    room.players.forEach((p) => {
+
+    room.players.forEach(p => {
       if (p.id !== currentPlayer.id) io.to(p.id).emit("notYourTurn");
     });
 
     if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
     turnTimeouts[roomId] = setTimeout(() => {
       io.to(roomId).emit("message", `${currentPlayer.name} ran out of time and is disqualified!`);
+
       room.players = room.players.filter(p => p.id !== currentPlayer.id);
       io.to(roomId).emit("updatePlayers", room.players);
+
       checkGameOver(roomId);
 
       if (room.players.length > 1) {
@@ -198,4 +188,13 @@ io.on("connection", (socket) => {
   }
 });
 
+// --- SERVER ---
+const PORT = process.env.PORT ;
+if (!PORT) {
+  console.error("❌ PORT not defined! Railway provides process.env.PORT");
+  process.exit(1);
+}
 
+server.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
