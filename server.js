@@ -26,7 +26,8 @@ socket.on("createRoom", (name) => {
     turnIndex: 0,
     lastLetter: null,
     started: false,
-    leaderId: socket.id // store leader's socket id
+    leaderId: socket.id,
+    used: new Set(),
   };
   socket.join(roomId);
   io.to(roomId).emit("roomCreated", roomId);
@@ -67,32 +68,53 @@ socket.on("joinRoom", ({ roomId, playerName }) => {
     room.started = true;
     room.turnIndex = 0;
     room.lastLetter = null;
+    room.used = new Set(); 
 
     io.to(roomId).emit("gameStarted");
     startPlayerTurn(roomId);
   });
 
   // --- SUBMIT COUNTRY ---
-  socket.on("submitCountry", ({ roomId, name, place }) => {
-    const room = rooms[roomId];
-    if (!room) return;
+socket.on("submitCountry", ({ roomId, name, place }) => {
+  const room = rooms[roomId];
+  if (!room) return;
 
-    const lowerPlace = place.toLowerCase();
-    if (room.lastLetter && lowerPlace[0] !== room.lastLetter) {
-      socket.emit("message", `Must start with "${room.lastLetter.toUpperCase()}"!`);
-      return;
-    }
+  const lowerPlace = place.toLowerCase();
 
-    room.history.push(`${name}: ${place}`);
-    room.lastLetter = lowerPlace[lowerPlace.length - 1];
-
-    if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
-
-    room.turnIndex = (room.turnIndex + 1) % room.players.length;
-    io.to(roomId).emit("updateHistory", room.history);
-
-    startPlayerTurn(roomId);
+  // ✅ Check duplicate
+  const alreadyUsed = room.history.some(entry => {
+    const usedWord = entry.split(": ")[1].toLowerCase();
+    return usedWord === lowerPlace;
   });
+  if (alreadyUsed) {
+    socket.emit("message", `${place} is already used! Try another word.`);
+    // 👇 Explicitly tell client it's still their turn
+    socket.emit("yourTurn", { lastLetter: room.lastLetter });
+    return;
+  }
+
+  // ✅ Check last letter
+  if (room.lastLetter && lowerPlace[0] !== room.lastLetter) {
+    socket.emit("message", `Must start with "${room.lastLetter.toUpperCase()}"!`);
+    socket.emit("yourTurn", { lastLetter: room.lastLetter }); // 👈 keep their turn
+    return;
+  }
+
+  // ✅ Word is valid → clear timer and proceed
+  if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
+
+  room.history.push(`${name}: ${place}`);
+  room.lastLetter = lowerPlace[lowerPlace.length - 1];
+
+  room.turnIndex = (room.turnIndex + 1) % room.players.length;
+  io.to(roomId).emit("updateHistory", room.history);
+
+  checkGameOver(roomId);
+  startPlayerTurn(roomId);
+});
+
+
+
 
   // --- GIVE UP ---
   socket.on("giveUp", ({ roomId, name }) => {
@@ -130,7 +152,7 @@ socket.on("playAgain", (roomId) => {
   room.turnIndex = 0;
   room.lastLetter = null;
   room.started = false;
-
+  room.used = new Set(); 
   io.to(roomId).emit("resetGame"); // client resets UI
   io.to(roomId).emit("updatePlayers", room.players); // show leader in players list
 });
@@ -217,7 +239,7 @@ function checkGameOver(roomId) {
 });
 
 // --- SERVER ---
-const PORT = process.env.PORT ;
+const PORT = process.env.PORT || 3000;
 if (!PORT) {
   console.error("❌ PORT not defined! Railway provides process.env.PORT");
   process.exit(1);

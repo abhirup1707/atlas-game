@@ -144,7 +144,7 @@ function submitCountry() {
   socket.emit("submitCountry", { roomId, name: playerName, place: input });
   yourTurn = false;
 
-  if (countdownInterval) clearInterval(countdownInterval);
+  
 }
 
 function giveUp() {
