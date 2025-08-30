@@ -17,46 +17,47 @@ io.on("connection", (socket) => {
   console.log("Player connected:", socket.id);
 
   // --- CREATE ROOM ---
-  socket.on("createRoom", (name) => {
-    const roomId = Math.random().toString(36).substring(2, 8);
-    rooms[roomId] = {
-      players: [{ id: socket.id, name }],
-      history: [],
-      turnIndex: 0,
-      lastLetter: null,
-      started: false,
-    };
-    socket.join(roomId);
-    io.to(roomId).emit("roomCreated", roomId);
-    io.to(roomId).emit("updatePlayers", rooms[roomId].players);
-  });
+
+socket.on("createRoom", (name) => {
+  const roomId = Math.random().toString(36).substring(2, 8);
+  rooms[roomId] = {
+    players: [{ id: socket.id, name, isLeader: true }], // mark leader
+    history: [],
+    turnIndex: 0,
+    lastLetter: null,
+    started: false,
+    leaderId: socket.id // store leader's socket id
+  };
+  socket.join(roomId);
+  io.to(roomId).emit("roomCreated", roomId);
+  io.to(roomId).emit("updatePlayers", rooms[roomId].players);
+});
+
 
   // --- JOIN ROOM ---
-  socket.on("joinRoom", ({ roomId, playerName }) => {
-    const room = rooms[roomId];
-    if (!room) {
-      socket.emit("errorMessage", "Room does not exist");
-      return;
-    }
+socket.on("joinRoom", ({ roomId, playerName }) => {
+  const room = rooms[roomId];
+  if (!room) {
+    socket.emit("errorMessage", "Room does not exist");
+    return;
+  }
 
-    const newPlayer = { id: socket.id, name: playerName, active: true };
-    room.players.push(newPlayer);
-    socket.join(roomId);
+  const newPlayer = { id: socket.id, name: playerName, active: true, isLeader: false };
+  room.players.push(newPlayer);
+  socket.join(roomId);
 
-    // Send full game state to the new player
-    socket.emit("initState", {
-      history: room.history,
-      players: room.players,
-      turnIndex: room.turnIndex,
-      lastLetter: room.lastLetter,
-      started: room.started && room.players.includes(newPlayer), // only true if player is in this round
-    });
-
-    // Notify all players (including new player) about updated players
-    io.to(roomId).emit("updatePlayers", room.players);
-
-    console.log(`${playerName} joined room ${roomId}`);
+  // Send full game state to the new player
+  socket.emit("initState", {
+    history: room.history,
+    players: room.players,
+    turnIndex: room.turnIndex,
+    lastLetter: room.lastLetter,
+    started: room.started
   });
+
+  io.to(roomId).emit("updatePlayers", room.players);
+});
+
 
   // --- START GAME ---
   socket.on("startGame", (roomId) => {
@@ -116,20 +117,31 @@ io.on("connection", (socket) => {
   });
 
   // --- PLAY AGAIN ---
-  socket.on("playAgain", (roomId) => {
-    const room = rooms[roomId];
-    if (!room) return;
+// --- PLAY AGAIN ---
+// --- PLAY AGAIN ---
+socket.on("playAgain", (roomId) => {
+  const room = rooms[roomId];
+  if (!room) return;
 
-    room.history = [];
-    room.turnIndex = 0;
-    room.lastLetter = null;
-    room.started = true;
+  const leader = room.players.find(p => p.id === room.leaderId); // find leader explicitly
+  room.players = leader ? [leader] : []; // keep only leader
 
-    io.to(roomId).emit("gameStarted");
-    io.to(roomId).emit("updateHistory", room.history);
+  room.history = [];
+  room.turnIndex = 0;
+  room.lastLetter = null;
+  room.started = false;
 
-    startPlayerTurn(roomId);
-  });
+  io.to(roomId).emit("resetGame"); // client resets UI
+  io.to(roomId).emit("updatePlayers", room.players); // show leader in players list
+});
+
+
+
+
+
+
+
+
 
   // --- DISCONNECT ---
   socket.on("disconnect", () => {
@@ -146,46 +158,62 @@ io.on("connection", (socket) => {
 
   // --- HELPERS ---
   function startPlayerTurn(roomId) {
-    const room = rooms[roomId];
-    if (!room || room.players.length === 0) return;
+  const room = rooms[roomId];
+  if (!room || room.players.length === 0) return;
 
-    const currentPlayer = room.players[room.turnIndex];
-    io.to(currentPlayer.id).emit("yourTurn", room.lastLetter);
+  const currentPlayer = room.players[room.turnIndex];
 
-    room.players.forEach(p => {
-      if (p.id !== currentPlayer.id) io.to(p.id).emit("notYourTurn");
-    });
-
-    if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
-    turnTimeouts[roomId] = setTimeout(() => {
-      io.to(roomId).emit("message", `${currentPlayer.name} ran out of time and is disqualified!`);
-
-      room.players = room.players.filter(p => p.id !== currentPlayer.id);
-      io.to(roomId).emit("updatePlayers", room.players);
-
-      checkGameOver(roomId);
-
-      if (room.players.length > 1) {
-        if (room.turnIndex >= room.players.length) room.turnIndex = 0;
-        startPlayerTurn(roomId);
-      }
-    }, 15000);
-  }
-
-  function checkGameOver(roomId) {
-    const room = rooms[roomId];
-    if (!room) return;
-
-    if (room.players.length === 1) {
-      const winner = room.players[0];
-      io.to(roomId).emit("gameOver", { name: winner.name });
-    } else if (room.players.length === 0) {
-      io.to(roomId).emit("gameOver", { name: "No one" });
-      io.to(roomId).emit("resetGame");
-      delete rooms[roomId];
-      if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
+  // Tell everyone whose turn it is and the required starting letter
+  room.players.forEach(p => {
+    if (p.id === currentPlayer.id) {
+      io.to(p.id).emit("yourTurn", room.lastLetter);
+    } else {
+      io.to(p.id).emit("notYourTurn", {
+        playerName: currentPlayer.name,
+        lastLetter: room.lastLetter
+      });
     }
+  });
+
+  // Reset any old timeout
+  if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
+
+  // Start countdown (20s)
+  turnTimeouts[roomId] = setTimeout(() => {
+    io.to(roomId).emit("message", `${currentPlayer.name} ran out of time and is disqualified!`);
+
+    // Remove the player
+    room.players = room.players.filter(p => p.id !== currentPlayer.id);
+    io.to(roomId).emit("updatePlayers", room.players);
+
+    checkGameOver(roomId);
+
+    if (room.players.length > 1) {
+      if (room.turnIndex >= room.players.length) room.turnIndex = 0;
+      startPlayerTurn(roomId);
+    }
+  }, 20000);
+}
+
+
+
+function checkGameOver(roomId) {
+  const room = rooms[roomId];
+  if (!room) return;
+
+  if (room.players.length === 1) {
+    const winner = room.players[0];
+    io.to(roomId).emit("gameOver", { name: winner.name });
+    // Do NOT reset yet — wait for playAgain
+  } else if (room.players.length === 0) {
+    io.to(roomId).emit("gameOver", { name: "No one" });
+    if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
+    delete rooms[roomId];
   }
+}
+
+
+
 });
 
 // --- SERVER ---

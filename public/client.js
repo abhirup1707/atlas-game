@@ -23,13 +23,55 @@ const validPlaces = [
   'Yemen','Zambia','Zimbabwe',
 
   // Cities (expanded)
-  'New York','London','Paris','Tokyo','Berlin','Madrid','Rome','Beijing','Moscow','Sydney','Los Angeles','Toronto','Delhi','Mumbai','Shanghai','Istanbul','Dubai','Seoul','Bangkok','Singapore','Hong Kong','Barcelona','Chicago','San Francisco','Lisbon','Vienna','Prague','Budapest','Dublin','Amsterdam','Brussels','Copenhagen','Stockholm','Helsinki','Warsaw','Athens','Jakarta','Kuala Lumpur','Manila','Buenos Aires','Rio de Janeiro','Sao Paulo','Cape Town','Lagos','Cairo','Nairobi','Lima','Mexico City','Santiago','Tehran','Baghdad','Riyadh','Karachi','Lahore','Kathmandu','Hanoi','Ho Chi Minh City','Melbourne','Osaka','Auckland','Vancouver','Zurich','Geneva','Adelaide','Brisbane','Perth','Canberra','Gold Coast','Beirut','Kiev','Helsinki','Oslo','Stockholm','Helsinki','Havana','Casablanca','Accra','Addis Ababa','Montevideo','Porto','Edinburgh','Glasgow','Munich','Frankfurt','Naples','Venice','Florence','Hamburg','Barcelona','Seville','Valencia','Lisbon','Porto','Madrid','Malaga','Seoul','Busan','Kyoto','Nagoya','Sapporo','Fukuoka','Hiroshima',
+  
+  'Paris', 'Madrid', 'Tokyo', 'Rome', 'Milan', 'New York City', 'Amsterdam', 'Sydney', 'Singapore', 'Barcelona', 'Taipei', 'Seoul', 'London', 'Dubai', 'Berlin', 'Osaka', 'Bangkok', 'Los Angeles', 'Istanbul', 'Melbourne', 'Hong Kong', 'Munich', 'Las Vegas', 'Florence', 'Prague', 'Dublin', 'Kyoto', 'Vienna', 'Lisbon', 'Venice', 'Kuala Lumpur', 'Athens', 'Orlando', 'Toronto', 'Miami', 'San Francisco', 'Shanghai', 'Frankfurt am Main', 'Copenhagen', 'Zurich', 'Washington', 'Vancouver', 'Stockholm', 'Mexico City', 'Oslo', 'São Paulo', 'Helsinki', 'Brussels', 'Budapest', 'Guangzhou', 'Nice', 'Montreal', 'Cancún', 'Bologna', 'Rhodes', 'Verona', 'Porto', 'Ho Chi Minh City', 'Buenos Aires', 'Rio de Janeiro', 'Kraków', 'Hanoi', 'Tel Aviv', 'Lima', 'Riyadh', 'Tallinn', 'Marrakech', 'Santiago', 'Vilnius', 'Shanghai', 'Dhaka', 'Cairo', 'Beijing', 'Chongqing', 'Karachi', 'Kinshasa', 'Lagos', 'Manila', 'Tianjin', 'Lahore', 'Shenzhen', 'Moscow', 'Bogota', 'Jakarta', 'Luanda', 'Tehran', 'Nanjing', 'Chengdu', 'Toronto', 'Vancouver', 'Mexico City', 'São Paulo', 'Buenos Aires', 'Rio de Janeiro', 'Bangkok', 'Ho Chi Minh City', 'Shanghai', 'Hong Kong', 'Tokyo', 'Osaka', 'London', 'Paris', 'Beijing', 'Cairo', 'Lagos', 'Kinshasa', 'Guangzhou', 'Buenos Aires', 'Moscow', 'Istanbul', 'Dhaka', 'Karachi', 'Bogota', 'Jakarta', 'Lima', 'Tehran', 'Riyadh', 'Hanoi', 'Kuala Lumpur', 'Bangkok', 'Marrakech', 'Santiago', 'Tel Aviv', 'Lima', 'Riyadh', 'Athens', 'Moscow', 'Dubai',
+'California', 'Texas', 'New York', 'Florida', 'Illinois', 'Pennsylvania', 'Ohio', 'Georgia', 'Michigan', 'North Carolina', 'Ontario', 'Quebec', 'British Columbia', 'Bavaria', 'Berlin', 'Hamburg', 'Saxony', 'North Rhine-Westphalia', 'Île-de-France', 'Provence-Alpes-Côte d’Azur', 'Normandy', 'New South Wales', 'Victoria', 'Queensland', 'Guangdong', 'Sichuan', 'Zhejiang', 'São Paulo (state)', 'Rio de Janeiro (state)', 'Jalisco', 'Nuevo León', 'Moscow Oblast', 'Saint Petersburg', 'Tokyo Prefecture', 'Osaka Prefecture', 'Gauteng', 'Western Cape', 'Buenos Aires Province', 'Catalonia', 'Andalusia', 'Hong Kong (SAR)', 'Macau (SAR)', 'Azores', 'Greenland', 
+ 
+  // Continents
+  'Africa','Antarctica','Asia','Europe','North America','Oceania','South America',
 
   // Oceans
   'Pacific Ocean','Atlantic Ocean','Indian Ocean','Southern Ocean','Arctic Ocean',
 
+  // Indian States and Territories
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi (National Capital Territory)', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
+
+  // Indian Rivers
+  'Ganges','Yamuna','Brahmaputra','Indus','Godavari','Krishna','Narmada','Tapi','Mahanadi','Cauvery','Sutlej','Beas','Chenab','Ravi','Ghaghara','Kosi','Son',
+
+  //Indian Mountains
+  'Himalayas','Vindhya','Aravalli','Satpura','Nilgiri','Annamalai','Cardamom','Dhauladhar','Pir Panjal','Zanskar',
+
+  //Indian Lakes
+  'Dal Lake','Wular Lake','Chilika Lake','Sambhar Lake','Vembanad Lake','Loktak Lake','Pangong Lake','Tso Moriri','Nainital Lake','Pushkar Lake',
+  'Sardar Sarovar','Hussain Sagar','Bhimtal Lake','Ranganathittu',
+  'Kolleru Lake','Manasbal Lake','Kailash Lake','Renuka Lake','Gobind Sagar','Anchar Lake','Nalsarovar','Sambhar Salt Lake',
+  'Banasura Sagar Dam','Srisailam Dam','Tehri Dam','Idukki Dam','Nagarjuna Sagar Dam','Bhakra Nangal Dam','Hirakud Dam','Tungabhadra Dam',
+  'Mettur Dam','Rihand Dam','Indira Sagar Dam','Koyna Dam','Sardar Sarovar Dam',
+  'Upper Bhavani Dam','Kundah Dam','Pong Dam','Chamera Dam','Dindi Dam',
+  'Mullaperiyar Dam','Srisailam Dam','Nagarjuna Sagar Dam','Hirakud Dam','Tehri Dam',
+  'Bhakra Nangal Dam','Koyna Dam','Indira Sagar Dam','Sardar Sarovar Dam',
+  'Tungabhadra Dam','Pong Dam','Chamera Dam','Dindi Dam','Upper Bhavani Dam',
+  'Kundah Dam','Mullaperiyar Dam',
+
+  //Indian Deserts
+  'Thar Desert','Rann of Kutch','Chambal Valley','Aravalli Range Desert','Kutch Desert','Luni Desert',
+  'Great Rann of Kutch','Little Rann of Kutch','Marusthali Desert','Banni Grasslands','Dholavira Desert',
+  'Pokhran Desert','Kharan Desert','Cholistan Desert','Tharparkar Desert',
+  'Kachchh Desert','Barmer Desert','Jaisalmer Desert','Jodhpur Desert','Bikaner Desert',
+  'Jungle Broom Desert','Ladakh Desert','Spiti Desert','Cold Desert of Himachal Pradesh',
+
+  //Indian Cities and Towns
+  'Port Blair', 'Adoni', 'Amaravati', 'Anantapur', 'Chandragiri', 'Chittoor', 'Dowlaiswaram', 'Eluru', 'Guntur', 'Kadapa', 'Kakinada', 'Kurnool', 
+  'Machilipatnam', 'Nagarjunakoṇḍa', 'Rajahmundry', 'Srikakulam', 'Tirupati', 'Vijayawada', 'Visakhapatnam', 'Vizianagaram', 'Yemmiganur', 'Itanagar', 'Dhuburi', 'Dibrugarh', 'Dispur', 'Guwahati', 'Jorhat', 'Nagaon', 'Sivasagar', 'Silchar', 'Tezpur', 'Tinsukia', 'Ara', 'Barauni', 'Begusarai', 'Bettiah', 'Bhagalpur', 'Bihar Sharif', 'Bodh Gaya', 'Buxar', 'Chapra', 'Darbhanga', 'Dehri', 'Dinapur Nizamat', 'Gaya', 'Hajipur', 'Jamalpur', 'Katihar', 'Madhubani', 'Motihari', 'Munger', 'Muzaffarpur', 'Patna', 'Purnia', 'Pusa', 'Saharsa', 'Samastipur', 'Sasaram', 'Sitamarhi', 'Siwan', 'Chandigarh', 'Ambikapur', 'Bhilai', 'Bilaspur', 'Dhamtari', 'Durg', 'Jagdalpur', 'Raipur', 'Rajnandgaon', 'Daman', 'Diu', 'Silvassa', 'Delhi', 'New Delhi', 'Madgaon', 'Panaji', 'Ahmadabad', 'Amreli', 'Bharuch', 'Bhavnagar', 'Bhuj', 'Dwarka', 'Gandhinagar', 'Godhra', 'Jamnagar', 'Junagadh', 'Kandla', 'Khambhat', 'Kheda', 'Mahesana', 'Morbi', 'Nadiad', 'Navsari', 'Okha', 'Palanpur', 'Patan', 'Porbandar', 'Rajkot', 
+  'Surat', 'Surendranagar', 'Valsad', 'Veraval', 'Ambala', 'Bhiwani', 'Faridabad', 'Firozpur Jhirka', 'Gurugram', 'Hansi', 'Hisar', 'Jind', 'Kaithal', 'Karnal', 'Kurukshetra', 'Panipat', 'Pehowa', 'Rewari', 'Rohtak', 'Sirsa', 'Sonipat', 'Bilaspur', 'Chamba', 'Dalhousie', 'Dharmshala', 'Hamirpur', 'Kangra', 'Kullu', 'Mandi', 'Nahan', 'Shimla', 'Una', 'Anantnag', 'Baramula', 'Doda', 'Gulmarg', 'Jammu', 'Kathua', 'Punch', 'Rajouri', 'Srinagar', 'Udhampur', 'Bokaro', 'Chaibasa', 'Deoghar', 'Dhanbad', 'Dumka', 'Giridih', 'Hazaribag', 'Jamshedpur', 'Jharia', 'Rajmahal', 'Ranchi', 'Saraikela', 'Badami', 'Ballari', 'Bengaluru', 'Belagavi', 'Bhadravati', 'Bidar', 'Chikkamagaluru', 'Chitradurga', 'Davangere', 'Halebid', 'Hassan', 'Hubballi-Dharwad', 'Kalaburagi', 'Kolar', 'Madikeri', 'Mandya', 'Mangaluru', 'Mysuru', 'Raichur', 'Shivamogga', 'Shravanabelagola', 'Shrirangapattana', 'Tumakuru', 'Vijayapura', 'Alappuzha', 'Vatakara', 'Idukki', 'Kannur', 'Kochi', 'Kollam', 'Kottayam', 'Kozhikode', 'Mattancheri', 'Palakkad', 'Thalassery', 'Thiruvananthapuram', 'Thrissur', 'Kargil', 'Leh', 'Balaghat', 'Barwani', 'Betul', 'Bharhut', 'Bhind', 'Bhojpur', 'Bhopal', 'Burhanpur', 
+  'Chhatarpur', 'Chhindwara', 'Damoh', 'Datia', 'Dewas', 'Dhar', 'Dr. Ambedkar Nagar (Mhow)', 'Guna', 'Gwalior', 'Hoshangabad', 'Indore', 'Itarsi', 'Jabalpur', 'Jhabua', 'Khajuraho', 'Khandwa', 'Khargone', 'Maheshwar', 'Mandla', 'Mandsaur', 'Morena', 'Murwara', 'Narsimhapur', 'Narsinghgarh', 'Narwar', 'Neemuch', 'Nowgong', 'Orchha', 'Panna', 'Raisen', 'Rajgarh', 'Ratlam', 'Rewa', 'Sagar', 'Sarangpur', 'Satna', 'Sehore', 'Seoni', 'Shahdol', 'Shajapur', 'Sheopur', 'Shivpuri', 'Ujjain', 'Vidisha', 'Ahmadnagar', 'Akola', 'Amravati', 'Aurangabad', 'Bhandara', 'Bhusawal', 'Bid', 'Buldhana', 'Chandrapur', 'Daulatabad', 'Dhule', 'Jalgaon', 'Kalyan', 'Karli', 'Kolhapur', 'Mahabaleshwar', 'Malegaon', 'Matheran', 'Mumbai', 'Nagpur', 'Nanded', 'Nashik', 'Osmanabad', 'Pandharpur', 'Parbhani', 'Pune', 'Ratnagiri', 'Sangli', 'Satara', 'Sevagram', 'Solapur', 'Thane', 'Ulhasnagar', 'Vasai-Virar', 'Wardha', 'Yavatmal', 'Imphal', 'Cherrapunji', 'Shillong', 'Aizawl', 'Lunglei', 'Kohima', 'Mon', 'Phek', 'Wokha', 'Zunheboto', 'Balangir', 'Baleshwar', 'Baripada', 'Bhubaneshwar', 'Brahmapur', 'Cuttack', 'Dhenkanal', 'Kendujhar', 'Konark', 'Koraput', 'Paradip', 'Phulabani', 'Puri', 'Sambalpur', 'Udayagiri', 'Karaikal', 'Mahe', 'Puducherry', 'Yanam', 'Amritsar', 
+  'Batala', 'Faridkot', 'Firozpur', 'Gurdaspur', 'Hoshiarpur', 'Jalandhar', 'Kapurthala', 'Ludhiana', 'Nabha', 'Patiala', 'Rupnagar', 'Sangrur', 'Abu', 'Ajmer', 'Alwar', 'Amer', 'Barmer', 'Beawar', 'Bharatpur', 'Bhilwara', 'Bikaner', 'Bundi', 'Chittaurgarh', 'Churu', 'Dhaulpur', 'Dungarpur', 'Ganganagar', 'Hanumangarh', 'Jaipur', 'Jaisalmer', 'Jalor', 'Jhalawar', 'Jhunjhunu', 'Jodhpur', 'Kishangarh', 'Kota', 'Merta', 'Nagaur', 'Nathdwara', 'Pali', 'Phalodi', 'Pushkar', 'Sawai Madhopur', 'Shahpura', 'Sikar', 'Sirohi', 'Tonk', 'Udaipur', 'Gangtok', 'Gyalshing', 'Lachung', 'Mangan', 'Arcot', 'Chengalpattu', 'Chennai', 'Chidambaram', 'Coimbatore', 'Cuddalore', 'Dharmapuri', 'Dindigul', 'Erode', 'Kanchipuram', 'Kanniyakumari', 'Kodaikanal', 'Kumbakonam', 'Madurai', 'Mamallapuram', 'Nagappattinam', 'Nagercoil', 'Palayamkottai', 'Pudukkottai', 'Rajapalayam', 'Ramanathapuram', 'Salem', 'Thanjavur', 'Tiruchchirappalli', 'Tirunelveli', 'Tiruppur', 'Thoothukudi', 'Udhagamandalam', 'Vellore', 'Hyderabad', 'Karimnagar', 'Khammam', 'Mahbubnagar', 'Nizamabad', 'Sangareddi', 'Warangal', 'Agartala', 'Agra', 'Aligarh', 'Amroha', 'Ayodhya', 'Azamgarh', 'Bahraich', 'Ballia', 'Banda', 'Bara Banki', 'Bareilly', 'Basti', 'Bijnor', 'Bithur', 'Budaun', 'Bulandshahr', 'Deoria', 'Etah', 'Etawah', 'Faizabad', 'Farrukhabad-cum-Fatehgarh', 'Fatehpur', 'Fatehpur Sikri', 'Ghaziabad', 'Ghazipur', 'Gonda', 'Gorakhpur', 'Hamirpur', 'Hardoi', 'Hathras', 'Jalaun', 'Jaunpur', 'Jhansi', 'Kannauj', 'Kanpur', 'Lakhimpur', 'Lalitpur', 'Lucknow', 'Mainpuri', 'Mathura', 'Meerut', 'Mirzapur-Vindhyachal', 'Moradabad', 'Muzaffarnagar', 'Partapgarh', 'Pilibhit', 'Prayagraj', 'Rae Bareli', 'Rampur', 'Saharanpur', 'Sambhal', 'Shahjahanpur', 'Sitapur', 'Sultanpur', 'Tehri', 'Varanasi', 'Almora', 'Dehra Dun', 'Haridwar', 'Mussoorie', 'Nainital', 'Pithoragarh', 'Alipore', 'Alipur Duar', 'Asansol', 'Baharampur', 'Bally', 'Balurghat', 'Bankura', 'Baranagar', 'Barasat', 'Barrackpore', 'Basirhat', 'Bhatpara', 'Bishnupur', 'Budge Budge', 'Burdwan', 'Chandernagore', 'Darjeeling', 'Diamond Harbour', 'Dum Dum', 'Durgapur', 'Halisahar', 'Haora', 'Hugli', 'Ingraj Bazar', 'Jalpaiguri', 'Kalimpong', 'Kamarhati', 'Kanchrapara', 'Kharagpur', 'Cooch Behar', 'Kolkata', 'Krishnanagar', 'Malda', 'Midnapore', 'Murshidabad', 'Nabadwip', 'Palashi', 'Panihati', 'Purulia', 'Raiganj', 'Santipur', 'Shantiniketan', 'Shrirampur', 'Siliguri', 'Siuri', 'Tamluk', 'Titagarh', 
+  
   // Seas
-  'Mediterranean Sea','Caribbean Sea','Baltic Sea','Black Sea','Red Sea','North Sea','Caspian Sea','South China Sea','Coral Sea','Arabian Sea','Bering Sea','Okhotsk Sea','Philippine Sea','Japan Sea','Tasman Sea','Adriatic Sea','Aegean Sea',
+  'Adriatic Sea', 'Aegean Sea', 'Alboran Sea', 'Amundsen Sea', 'Andaman Sea', 'Arabian Sea', 'Aral Sea', 'Argentine Sea', 'Baffin Bay (sometimes called Baffin Sea)', 'Balearic Sea', 'Bali Sea', 'Banda Sea', 'Barents Sea', 'Beaufort Sea', 'Bellingshausen Sea', 'Bering Sea', 'Black Sea', 'Bothnian Sea', 'Caribbean Sea', 'Caspian Sea', 'Celebes Sea', 'Celtic Sea', 'Chukchi Sea', 'Cooperation Sea', 'Coral Sea', 'Davis Sea', 'East China Sea', 'East Siberian Sea', 'Flores Sea', 'Greenland Sea', 'Halmahera Sea', 'Hudson Bay (sometimes called Hudson Sea)', 'Ionian Sea', 'Irish Sea', 'Java Sea', 'Kara Sea', 'Koro Sea', 'Laptev Sea', 'Ligurian Sea', 'Lincoln Sea', 'Marmara Sea', 'Mediterranean Sea', 'Molucca Sea', 'Norwegian Sea', 'Okhotsk Sea', 'Philippine Sea', 'Red Sea', 'Ross Sea', 'Sargasso Sea', 'Scotia Sea', 'Sea of Azov', 'Sea of Japan (East Sea)', 'Sea of Okhotsk', 'Seram Sea', 'Sibuyan Sea', 'Solomon Sea', 'South China Sea', 'Tasman Sea', 'Thracian Sea', 'Timor Sea', 'Tyrrhenian Sea', 'Weddell Sea', 'White Sea', 'Yellow Sea',
+
 
   // Islands
   'Greenland','Madagascar','Borneo','Sumatra','Sicily','Honshu','Great Britain','Iceland','Sri Lanka','Hawaii','Fiji','Maldives','Bali','Tasmania','New Guinea','Sardinia','Corsica','Puerto Rico','Jamaica','Cuba'
@@ -119,24 +161,46 @@ function leaveRoom() {
 function resetUI(preGame = false) {
   yourTurn = false;
   gameStarted = false;
-  players = [];
   currentTurn = 0;
   lastLetterGlobal = null;
 
+  // Game container
   document.getElementById("game").style.display = preGame ? "block" : "none";
-  document.getElementById("lobby").style.display = preGame ? "block" : "block";
+
+  // Lobby container
+  // Leader who already has a room should not see create/join box
+  if (preGame) {
+    document.getElementById("lobby").style.display = isLeader ? "none" : "block";
+  } else {
+    document.getElementById("lobby").style.display = "block";
+  }
+
+  // Clear game-specific elements
   document.getElementById("history").innerHTML = "";
-  document.getElementById("playersList").innerHTML = "";
   showMessage("");
   document.getElementById("turnInfo").innerText = "";
   inputField.style.display = "none";
   inputField.disabled = false;
   document.querySelector(".buttons").style.display = "none";
-  document.getElementById("startGameBtn").style.display = isLeader ? "inline-block" : "none";
+
+  // Show start game button only if leader and preGame
+  document.getElementById("startGameBtn").style.display = isLeader && preGame ? "inline-block" : "none";
+
+  // Keep players list intact
+  updatePlayersList(players);
+
+  // Winner modal logic
+  // Do NOT show winner modal in resetUI. Winner modal is handled separately in gameOver
   document.getElementById("winnerModal").style.display = "none";
 
+
+  // Clear countdown
   if (countdownInterval) clearInterval(countdownInterval);
 }
+
+
+
+
 
 // --- SOCKET EVENTS ---
 socket.on("connect", () => { mySocketId = socket.id; });
@@ -155,7 +219,15 @@ socket.on("initState", ({ history, players: pl, turnIndex, lastLetter, started }
 
   updatePlayersList(players);
   updateHistory(history);
+
+  // Show the game UI properly for midgame joiners
+  showGameUI(false);       // not leader
+  if (gameStarted) {
+    inputField.style.display = "block";
+    document.querySelector(".buttons").style.display = "flex";
+  }
 });
+
 
 socket.on("updatePlayers", (pl) => { players = pl; updatePlayersList(players); });
 socket.on("updateHistory", (history) => updateHistory(history));
@@ -169,16 +241,47 @@ socket.on("gameStarted", () => {
 });
 
 socket.on("gameOver", (winner) => {
-  document.getElementById("winnerName").innerText = winner.name === "No one" ? "No one wins!" : `${winner.name} wins!`;
+  document.getElementById("winnerName").innerText =
+    winner.name === "No one" ? "No one wins!" : `${winner.name} wins!`;
+  
+  // Show the winner modal with Play Again button
   document.getElementById("winnerModal").style.display = "flex";
+  
+  // Disable input field and buttons
+  inputField.style.display = "none";
+  document.querySelector(".buttons").style.display = "none";
+  
+  if (countdownInterval) clearInterval(countdownInterval);
+});
+
+
+socket.on("resetGame", () => {
+  // Keep players list intact
+  updatePlayersList(players);
+
+  // Show pre-game UI
+  document.getElementById("lobby").style.display = isLeader ? "none" : "block";
+  document.getElementById("game").style.display = "block";
+
+  // Show start button for leader
+  document.getElementById("startGameBtn").style.display = isLeader ? "inline-block" : "none";
+
+  // Reset game variables
+  yourTurn = false;
+  gameStarted = false;
+  currentTurn = 0;
+  lastLetterGlobal = null;
+  document.getElementById("history").innerHTML = "";
+  showMessage("");
+  document.getElementById("turnInfo").innerText = "";
+  inputField.style.display = "none";
+  inputField.disabled = false;
+  document.querySelector(".buttons").style.display = "none";
 
   if (countdownInterval) clearInterval(countdownInterval);
 });
 
-socket.on("resetGame", () => {
-  // Reset UI and return to pre-game lobby
-  resetUI(true);
-});
+
 
 socket.on("yourTurn", (lastLetter) => {
   yourTurn = true;
@@ -186,7 +289,7 @@ socket.on("yourTurn", (lastLetter) => {
   inputField.disabled = false;
   inputField.style.display = "block";
 
-  let timeLeft = 15;
+  let timeLeft = 20;
   document.getElementById("turnInfo").innerText = lastLetter ? `Your turn! Start with "${lastLetter.toUpperCase()}" (${timeLeft}s)` : `Your turn! (${timeLeft}s)`;
   document.getElementById("turnInfo").dataset.lastLetter = lastLetter || "";
 
@@ -198,23 +301,45 @@ socket.on("yourTurn", (lastLetter) => {
   }, 1000);
 });
 
-socket.on("notYourTurn", () => {
+socket.on("notYourTurn", ({ playerName: currentPlayerName, lastLetter }) => {
   yourTurn = false;
   inputField.disabled = true;
-  document.getElementById("turnInfo").innerText = "Waiting for other players...";
-  if (countdownInterval) clearInterval(countdownInterval);
+
+  // Stop any running countdown
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+
+  // Update the info text
+  if (currentPlayerName) {
+    if (lastLetter) {
+      document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer (letter starting with "${lastLetter.toUpperCase()}")...`;
+    } else {
+      document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer...`;
+    }
+  } else {
+    document.getElementById("turnInfo").innerText = "Waiting for other players...";
+  }
 });
+
+
 
 // --- UTILITY ---
 function updatePlayersList(players) {
   const list = document.getElementById("playersList");
   list.innerHTML = "";
-  players.forEach(p => {
+
+  // Show leader first
+  const sortedPlayers = [...players].sort((a,b) => b.isLeader - a.isLeader);
+
+  sortedPlayers.forEach(p => {
     const li = document.createElement("li");
-    li.innerText = p.name;
+    li.innerText = p.name + (p.isLeader ? " (Leader)" : "");
     list.appendChild(li);
   });
 }
+
 
 function updateHistory(history) {
   const list = document.getElementById("history");
@@ -228,9 +353,31 @@ function updateHistory(history) {
 
 function showMessage(msg) { document.getElementById("message").innerText = msg; }
 
-// --- PLAY AGAIN BUTTON ---
 function playAgain() {
   socket.emit("playAgain", roomId);
-  // Reset UI to pre-game state
-  resetUI(true);
+
+  // Hide winner modal
+  document.getElementById("winnerModal").style.display = "none";
+
+  // Reset game variables
+  yourTurn = false;
+  gameStarted = false;
+  currentTurn = 0;
+  lastLetterGlobal = null;
+  document.getElementById("history").innerHTML = "";
+  showMessage("");
+  document.getElementById("turnInfo").innerText = "";
+  inputField.style.display = "none";
+  inputField.disabled = false;
+  document.querySelector(".buttons").style.display = "none";
+
+  // Show start game button only for leader
+  document.getElementById("startGameBtn").style.display = isLeader ? "inline-block" : "none";
+
+  // Show pre-game UI and keep players visible
+  document.getElementById("lobby").style.display = isLeader ? "none" : "block";
+  updatePlayersList(players);
 }
+
+
+
