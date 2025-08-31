@@ -77,7 +77,8 @@ const validPlaces = // places.js
   // Islands
   'Greenland','Madagascar','Borneo','Sumatra','Sicily','Honshu','Great Britain','Iceland','Sri Lanka','Hawaii','Fiji','Maldives','Bali','Tasmania','New Guinea','Sardinia','Corsica','Puerto Rico','Jamaica','Cuba'
 ];
-  // ... (same as original, omitted for brevity];
+  // ... (same as original, omitted for brevity)
+
 
 let roomId = null;
 let playerName = null;
@@ -92,52 +93,32 @@ let countdownInterval = null;
 let bobbleInterval = null; // For constant bobbles
 
 const inputField = document.getElementById("countryInput");
+const startGameBtn = document.getElementById("startGameBtn");
+const createRoomBtn = document.getElementById("createRoomBtn");
 
-// --- CREATE / JOIN ROOM ---
-function createRoom() {
-  playerName = document.getElementById("playerName").value.trim();
-  if (!playerName) return alert("Enter your name!");
-  socket.emit("createRoom", playerName);
-}
-
-function joinRoom() {
-  playerName = document.getElementById("playerName").value.trim();
-  roomId = document.getElementById("roomIdInput").value.trim();
-  if (!playerName || !roomId) return alert("Enter name and room ID!");
-  socket.emit("joinRoom", { playerName, roomId });
-  showGameUI(false);
-}
-
-// --- GAME UI ---
-function showGameUI(leader) {
-  isLeader = leader;
-  document.getElementById("lobby").style.display = "none";
-  document.getElementById("game").style.display = "block";
-  document.getElementById("roomTitle").innerText = "Room: " + roomId;
-  document.getElementById("startGameBtn").style.display = leader ? "inline-block" : "none";
-  inputField.style.display = gameStarted ? "block" : "none";
-  document.querySelector(".buttons").style.display = gameStarted ? "flex" : "none";
-}
-
-// --- START / SUBMIT / GIVE UP ---
-function startGame() {
-  if (!isLeader || !roomId) return;
-  socket.emit("startGame", roomId);
-  document.getElementById("startGameBtn").style.display = "none";
-}
-
-function submitCountry() {
-  if (!yourTurn) return;
+// Global function definitions
+window.submitCountry = function submitCountry() {
+  console.log("Submit Country triggered, yourTurn:", yourTurn, "input:", inputField.value, "roomId:", roomId);
+  if (!yourTurn) {
+    console.log("Cannot submit: Not your turn");
+    return;
+  }
   const input = inputField.value.trim();
-  if (!input) return;
+  if (!input) {
+    console.log("Cannot submit: Input is empty");
+    showMessage("Please enter a place!");
+    return;
+  }
 
   const lastLetter = document.getElementById("turnInfo").dataset.lastLetter;
   if (lastLetter && input[0].toLowerCase() !== lastLetter) {
+    console.log("Cannot submit: Wrong starting letter, expected:", lastLetter);
     showMessage(`Must start with "${lastLetter.toUpperCase()}"!`);
     return;
   }
 
   if (!validPlaces.map(p => p.toLowerCase()).includes(input.toLowerCase())) {
+    console.log("Cannot submit: Invalid place");
     showMessage("Invalid place!");
     return;
   }
@@ -145,18 +126,21 @@ function submitCountry() {
   inputField.value = "";
   showMessage("");
   socket.emit("submitCountry", { roomId, name: playerName, place: input });
+  console.log("Submit Country sent to server:", { roomId, name: playerName, place: input });
   yourTurn = false;
-}
+};
 
 function giveUp() {
   if (!roomId) return;
   socket.emit("giveUp", { roomId, name: playerName });
+  console.log("Give Up triggered, roomId:", roomId, "name:", playerName);
 }
 
 function leaveRoom() {
   if (!roomId) return;
   socket.emit("leaveRoom", roomId);
   resetUI();
+  console.log("Leave Room triggered, roomId:", roomId);
 }
 
 function resetUI(preGame = false) {
@@ -184,158 +168,14 @@ function resetUI(preGame = false) {
   document.querySelector(".buttons").style.display = "none";
 
   // Show start game button only if leader and preGame
-  document.getElementById("startGameBtn").style.display = isLeader && preGame ? "inline-block" : "none";
+  if (startGameBtn) {
+    startGameBtn.style.display = isLeader && preGame ? "inline-block" : "none";
+  }
 
   // Keep players list intact
   updatePlayersList(players);
-
-  // Winner modal logic
-  document.getElementById("winnerModal").style.display = "none";
-
-  // Clear countdown
-  if (countdownInterval) clearInterval(countdownInterval);
 }
 
-// --- SOCKET EVENTS ---
-socket.on("connect", () => { mySocketId = socket.id; });
-
-socket.on("roomCreated", (id) => {
-  roomId = id;
-  isLeader = true;
-  showGameUI(true);
-});
-
-socket.on("initState", ({ history, players: pl, turnIndex, lastLetter, started }) => {
-  players = pl;
-  currentTurn = turnIndex;
-  lastLetterGlobal = lastLetter;
-  gameStarted = started;
-
-  updatePlayersList(players);
-  updateHistory(history);
-
-  showGameUI(false);
-  if (gameStarted) {
-    inputField.style.display = "block";
-    document.querySelector(".buttons").style.display = "flex";
-  }
-});
-
-socket.on("updatePlayers", (pl) => { players = pl; updatePlayersList(players); });
-socket.on("updateHistory", (history) => updateHistory(history));
-socket.on("message", showMessage);
-
-socket.on("gameStarted", () => {
-  gameStarted = true;
-  inputField.style.display = "block";
-  document.querySelector(".buttons").style.display = "flex";
-  document.getElementById("startGameBtn").style.display = "none";
-});
-
-socket.on("gameOver", (winner) => {
-  const winnerName = document.getElementById("winnerName");
-  const modal = document.getElementById("winnerModal");
-
-  // Initial fade-in of modal
-  modal.style.display = "flex";
-  modal.style.opacity = "0";
-  setTimeout(() => {
-    modal.style.transition = "opacity 0.5s";
-    modal.style.opacity = "1";
-  }, 50);
-
-  // Dynamic winner message with delay
-  setTimeout(() => {
-    winnerName.innerHTML = winner.name === "No one" 
-      ? "No one wins!" 
-      : `<span class="winner-text">${winner.name}</span> wins with <span class="points-text">${winner.points}</span> points!`;
-    winnerName.style.opacity = "0";
-    setTimeout(() => {
-      winnerName.style.transition = "opacity 1s";
-      winnerName.style.opacity = "1";
-      
-      // Pop out emojis
-      createPartyEmojis();
-
-      // Start constant falling bobbles
-      bobbleInterval = setInterval(createSingleBobble, 200); // Create a new bobble every 200ms
-    }, 50);
-  }, 500);
-
-  // Disable input and buttons
-  inputField.style.display = "none";
-  document.querySelector(".buttons").style.display = "none";
-
-  if (countdownInterval) clearInterval(countdownInterval);
-});
-
-socket.on("resetGame", () => {
-  // Keep players list intact
-  updatePlayersList(players);
-
-  // Show pre-game UI
-  document.getElementById("lobby").style.display = isLeader ? "none" : "block";
-  document.getElementById("game").style.display = "block";
-
-  // Show start button for leader
-  document.getElementById("startGameBtn").style.display = isLeader ? "inline-block" : "none";
-
-  // Reset game variables
-  yourTurn = false;
-  gameStarted = false;
-  currentTurn = 0;
-  lastLetterGlobal = null;
-  document.getElementById("history").innerHTML = "";
-  showMessage("");
-  document.getElementById("turnInfo").innerText = "";
-  inputField.style.display = "none";
-  inputField.disabled = false;
-  document.querySelector(".buttons").style.display = "none";
-
-  if (countdownInterval) clearInterval(countdownInterval);
-});
-
-socket.on("yourTurn", (lastLetter) => {
-  yourTurn = true;
-  lastLetterGlobal = lastLetter;
-  inputField.disabled = false;
-  inputField.style.display = "block";
-
-  let timeLeft = 20;
-  document.getElementById("turnInfo").innerText = lastLetter ? `Your turn! Start with "${lastLetter.toUpperCase()}" (${timeLeft}s)` : `Your turn! (${timeLeft}s)`;
-  document.getElementById("turnInfo").dataset.lastLetter = lastLetter || "";
-
-  if (countdownInterval) clearInterval(countdownInterval);
-  countdownInterval = setInterval(() => {
-    timeLeft--;
-    document.getElementById("turnInfo").innerText = lastLetter ? `Your turn! Start with "${lastLetter.toUpperCase()}" (${timeLeft}s)` : `Your turn! (${timeLeft}s)`;
-    if (timeLeft <= 0) clearInterval(countdownInterval);
-  }, 1000);
-});
-
-socket.on("notYourTurn", ({ playerName: currentPlayerName, lastLetter }) => {
-  yourTurn = false;
-  inputField.disabled = true;
-
-  // Stop any running countdown
-  if (countdownInterval) {
-    clearInterval(countdownInterval);
-    countdownInterval = null;
-  }
-
-  // Update the info text
-  if (currentPlayerName) {
-    if (lastLetter) {
-      document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer (letter starting with "${lastLetter.toUpperCase()}"...`;
-    } else {
-      document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer...`;
-    }
-  } else {
-    document.getElementById("turnInfo").innerText = "Waiting for other players...";
-  }
-});
-
-// --- UTILITY ---
 function updatePlayersList(players) {
   const list = document.getElementById("playersList");
   list.innerHTML = "";
@@ -348,6 +188,7 @@ function updatePlayersList(players) {
     li.innerText = p.name + (p.isLeader ? " (Leader)" : "") + ` (${p.points} pts)`;
     list.appendChild(li);
   });
+  console.log("Players list updated with points:", players.map(p => ({ name: p.name, points: p.points }))); // Detailed points log
 }
 
 function updateHistory(history) {
@@ -358,42 +199,14 @@ function updateHistory(history) {
     li.innerText = h;
     list.appendChild(li);
   });
+  console.log("History updated:", history); // Log updated history
 }
 
-function showMessage(msg) { document.getElementById("message").innerText = msg; }
-
-function playAgain() {
-  socket.emit("playAgain", roomId);
-
-  // Hide winner modal
-  document.getElementById("winnerModal").style.display = "none";
-
-  // Stop and remove bobbles and emojis
-  if (bobbleInterval) clearInterval(bobbleInterval);
-  document.querySelectorAll(".bobble").forEach(b => b.remove());
-  document.querySelectorAll(".party-emoji").forEach(e => e.remove());
-
-  // Reset game variables
-  yourTurn = false;
-  gameStarted = false;
-  currentTurn = 0;
-  lastLetterGlobal = null;
-  document.getElementById("history").innerHTML = "";
-  showMessage("");
-  document.getElementById("turnInfo").innerText = "";
-  inputField.style.display = "none";
-  inputField.disabled = false;
-  document.querySelector(".buttons").style.display = "none";
-
-  // Show start game button only for leader
-  document.getElementById("startGameBtn").style.display = isLeader ? "inline-block" : "none";
-
-  // Show pre-game UI and keep players visible
-  document.getElementById("lobby").style.display = isLeader ? "none" : "block";
-  updatePlayersList(players);
+function showMessage(msg) { 
+  document.getElementById("message").innerText = msg;
+  console.log("Message displayed:", msg); // Log messages
 }
 
-// --- PARTY EMOJIS ---
 function createPartyEmojis() {
   // Left emoji
   const leftEmoji = document.createElement("div");
@@ -414,7 +227,6 @@ function createPartyEmojis() {
   }, 50);
 }
 
-// --- CONSTANT FALLING BOBBLES ---
 function createSingleBobble() {
   const bobble = document.createElement("div");
   bobble.className = "bobble";
@@ -425,4 +237,262 @@ function createSingleBobble() {
 
   // Remove bobble after animation
   bobble.addEventListener("animationend", () => bobble.remove());
+}
+
+// Ensure DOM is ready before any UI manipulation
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM fully loaded, initializing client.js");
+  initializeUI();
+  createRoomBtn.addEventListener("click", createRoom); // Fallback event listener
+  console.log("submitCountry defined:", typeof window.submitCountry === "function"); // Verify function is defined
+});
+
+function initializeUI() {
+  // --- CREATE / JOIN ROOM ---
+  window.createRoom = function createRoom() {
+    playerName = document.getElementById("playerName").value.trim();
+    const rounds = parseInt(document.getElementById("roundsSelect").value);
+    if (!playerName) return alert("Enter your name!");
+    socket.emit("createRoom", { playerName, rounds });
+    console.log("Create Room triggered with name:", playerName, "rounds:", rounds);
+  };
+
+  window.joinRoom = function joinRoom() {
+    playerName = document.getElementById("playerName").value.trim();
+    roomId = document.getElementById("roomIdInput").value.trim();
+    if (!playerName || !roomId) return alert("Enter name and room ID!");
+    socket.emit("joinRoom", { playerName, roomId });
+    showGameUI(false);
+    console.log("Join Room triggered with name:", playerName, "roomId:", roomId);
+  };
+
+  // --- GAME UI ---
+  function showGameUI(leader) {
+    isLeader = leader;
+    document.getElementById("lobby").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    document.getElementById("roomTitle").innerText = "Room: " + roomId;
+    startGameBtn.style.display = leader && !gameStarted ? "inline-block" : "none"; // Set button visibility
+    inputField.style.display = gameStarted ? "block" : "none"; // Show input only when game starts
+    document.querySelector(".buttons").style.display = gameStarted ? "flex" : "none"; // Show buttons only when game starts
+    updatePlayersList(players); // Ensure players list is shown
+    console.log("UI State - Leader:", leader, "Game Started:", gameStarted, "Start Button Display:", startGameBtn ? startGameBtn.style.display : "null", "Button Exists:", !!startGameBtn);
+    if (leader && !gameStarted && startGameBtn) {
+      if (startGameBtn.style.display !== "inline-block") {
+        console.warn("Force showing Start Game button due to display issue");
+        startGameBtn.style.display = "inline-block"; // Fallback to force display
+        startGameBtn.style.visibility = "visible"; // Ensure visibility
+      }
+    }
+  }
+
+  // --- START / SUBMIT / GIVE UP ---
+  window.startGame = function startGame() {
+    if (!isLeader || !roomId) return;
+    socket.emit("startGame", roomId);
+    startGameBtn.style.display = "none"; // Hide start button after starting
+    gameStarted = true; // Set gameStarted to true
+    inputField.style.display = "block"; // Show input
+    document.querySelector(".buttons").style.display = "flex"; // Show buttons
+    console.log("Game started, roomId:", roomId);
+  };
+
+  window.giveUp = giveUp;
+  window.leaveRoom = leaveRoom;
+
+  window.playAgain = function playAgain() {
+    socket.emit("playAgain", roomId);
+
+    // Hide winner modal
+    document.getElementById("winnerModal").style.display = "none";
+
+    // Stop and remove bobbles and emojis
+    if (bobbleInterval) clearInterval(bobbleInterval);
+    document.querySelectorAll(".bobble").forEach(b => b.remove());
+    document.querySelectorAll(".party-emoji").forEach(e => e.remove());
+
+    // Reset game variables
+    yourTurn = false;
+    gameStarted = false;
+    currentTurn = 0;
+    lastLetterGlobal = null;
+    document.getElementById("history").innerHTML = "";
+    showMessage("");
+    document.getElementById("turnInfo").innerText = "";
+    inputField.style.display = "none";
+    inputField.disabled = false;
+    document.querySelector(".buttons").style.display = "none";
+
+    // Show start game button only for leader
+    if (startGameBtn) {
+      startGameBtn.style.display = isLeader ? "inline-block" : "none";
+    }
+
+    // Show pre-game UI and keep players visible
+    document.getElementById("lobby").style.display = isLeader ? "none" : "block";
+    updatePlayersList(players);
+  };
+
+  // --- SOCKET EVENTS ---
+  socket.on("connect", () => { mySocketId = socket.id; console.log("Socket connected, mySocketId:", mySocketId); });
+
+  socket.on("roomCreated", (data) => {
+    roomId = data.id;
+    isLeader = true;
+    players = [{ name: playerName, points: 0, isLeader: true, socketId: socket.id, turnsRemaining: data.rounds * 5 }];
+    setTimeout(() => showGameUI(true), 0); // Delay to ensure DOM update
+    console.log("Room Created - RoomID:", roomId, "Leader:", isLeader, "Players:", players, "Data:", data);
+  });
+
+  socket.on("initState", ({ history, players: pl, turnIndex, lastLetter, started }) => {
+    players = pl;
+    currentTurn = turnIndex;
+    lastLetterGlobal = lastLetter;
+    gameStarted = started;
+
+    updatePlayersList(players);
+    updateHistory(history);
+
+    showGameUI(false); // Show UI for joiners
+    if (gameStarted) {
+      inputField.style.display = "block";
+      document.querySelector(".buttons").style.display = "flex";
+    }
+    console.log("Init State - Players:", players, "Game Started:", gameStarted, "Turn Index:", turnIndex);
+  });
+
+  socket.on("updatePlayers", (pl) => {
+    players = pl;
+    updatePlayersList(players);
+    console.log("Players data received from server:", pl.map(p => ({ name: p.name, points: p.points }))); // Log received points
+  });
+
+  socket.on("updateHistory", (history) => {
+    updateHistory(history);
+    console.log("History updated:", history); // Log updated history
+  });
+
+  socket.on("message", showMessage);
+
+  socket.on("gameStarted", () => {
+    gameStarted = true;
+    inputField.style.display = "block";
+    document.querySelector(".buttons").style.display = "flex";
+    if (startGameBtn) startGameBtn.style.display = "none";
+    console.log("Game started event received, roomId:", roomId);
+  });
+
+  socket.on("yourTurn", ({ lastLetter }) => { // Destructure the object to get the string
+    yourTurn = true;
+    lastLetterGlobal = lastLetter;
+    inputField.disabled = false;
+    inputField.style.display = "block";
+    console.log("Your turn started, lastLetter:", lastLetter, "yourTurn:", yourTurn);
+
+    let timeLeft = 20;
+    document.getElementById("turnInfo").innerText = lastLetter ? `Your turn! Start with "${lastLetter.toUpperCase()}" (${timeLeft}s)` : `Your turn! (${timeLeft}s)`;
+    document.getElementById("turnInfo").dataset.lastLetter = lastLetter || "";
+
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      timeLeft--;
+      console.log("Timer tick, timeLeft:", timeLeft); // Log timer updates
+      document.getElementById("turnInfo").innerText = lastLetter ? `Your turn! Start with "${lastLetter.toUpperCase()}" (${timeLeft}s)` : `Your turn! (${timeLeft}s)`;
+      if (timeLeft <= 0) {
+        clearInterval(countdownInterval);
+        yourTurn = false; // Auto-end turn on timeout
+        document.getElementById("turnInfo").innerText = "Time's up!";
+        console.log("Turn timed out, yourTurn set to false");
+      }
+    }, 1000);
+  });
+
+  socket.on("notYourTurn", ({ playerName: currentPlayerName, lastLetter }) => {
+    yourTurn = false;
+    inputField.disabled = true;
+    console.log("Not your turn, current player:", currentPlayerName, "lastLetter:", lastLetter);
+
+    // Stop any running countdown
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+
+    // Update the info text
+    if (currentPlayerName) {
+      if (lastLetter) {
+        document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer (letter starting with "${lastLetter.toUpperCase()}"...`;
+      } else {
+        document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer...`;
+      }
+    } else {
+      document.getElementById("turnInfo").innerText = "Waiting for other players...";
+    }
+  });
+
+  socket.on("gameOver", (winner) => {
+    const winnerName = document.getElementById("winnerName");
+    const modal = document.getElementById("winnerModal");
+
+    // Initial fade-in of modal
+    modal.style.display = "flex";
+    modal.style.opacity = "0";
+    setTimeout(() => {
+      modal.style.transition = "opacity 0.5s";
+      modal.style.opacity = "1";
+    }, 50);
+
+    // Dynamic winner message with delay
+    setTimeout(() => {
+      winnerName.innerHTML = winner.name === "No one" 
+        ? "No one wins!" 
+        : `<span class="winner-text">${winner.name}</span> wins with <span class="points-text">${winner.points}</span> points!`;
+      winnerName.style.opacity = "0";
+      setTimeout(() => {
+        winnerName.style.transition = "opacity 1s";
+        winnerName.style.opacity = "1";
+        
+        // Pop out emojis
+        createPartyEmojis();
+
+        // Start constant falling bobbles
+        bobbleInterval = setInterval(createSingleBobble, 200); // Create a new bobble every 200ms
+      }, 50);
+    }, 500);
+
+    // Disable input and buttons
+    inputField.style.display = "none";
+    document.querySelector(".buttons").style.display = "none";
+
+    if (countdownInterval) clearInterval(countdownInterval);
+  });
+
+  socket.on("resetGame", () => {
+    // Keep players list intact
+    updatePlayersList(players);
+
+    // Show pre-game UI
+    document.getElementById("lobby").style.display = isLeader ? "none" : "block";
+    document.getElementById("game").style.display = "block";
+
+    // Show start button for leader
+    if (startGameBtn) {
+      startGameBtn.style.display = isLeader ? "inline-block" : "none";
+    }
+
+    // Reset game variables
+    yourTurn = false;
+    gameStarted = false;
+    currentTurn = 0;
+    lastLetterGlobal = null;
+    document.getElementById("history").innerHTML = "";
+    showMessage("");
+    document.getElementById("turnInfo").innerText = "";
+    inputField.style.display = "none";
+    inputField.disabled = false;
+    document.querySelector(".buttons").style.display = "none";
+
+    if (countdownInterval) clearInterval(countdownInterval);
+    console.log("Game reset, Leader:", isLeader, "Start Button Display:", startGameBtn ? startGameBtn.style.display : "null");
+  });
 }

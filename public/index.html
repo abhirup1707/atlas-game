@@ -16,9 +16,26 @@
     <!-- Lobby -->
     <div id="lobby" class="card">
       <input id="playerName" placeholder="Enter Your Name" aria-label="Player name" required>
-      <button onclick="createRoom()">Create Room</button>
+      <select id="roundsSelect" aria-label="Number of rounds">
+        <option value="1">1 Round</option>
+        <option value="2">2 Rounds</option>
+        <option value="3">3 Rounds</option>
+        <option value="4">4 Rounds</option>
+        <option value="5">5 Rounds</option>
+        <option value="6">6 Rounds</option>
+        <option value="7">7 Rounds</option>
+        <option value="8">8 Rounds</option>
+        <option value="9">9 Rounds</option>
+        <option value="10">10 Rounds</option>
+        <option value="11">11 Rounds</option>
+        <option value="12">12 Rounds</option>
+        <option value="13">13 Rounds</option>
+        <option value="14">14 Rounds</option>
+        <option value="15">15 Rounds</option>
+      </select>
+      <button id="createRoomBtn" onclick="createRoom()">Create Room</button> <!-- Updated ID -->
       <input id="roomIdInput" placeholder="Room ID (if joining)" aria-label="Room ID">
-      <button onclick="joinRoom()">Join Room</button>
+      <button id="joinRoomBtn" onclick="joinRoom()">Join Room</button> <!-- Updated ID for consistency -->
     </div>
 
     <!-- Game Area -->
