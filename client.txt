@@ -1,6 +1,5 @@
 const socket = io();
-const validPlaces = // places.js
-[
+const validPlaces = [
   // Countries
   'Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan',
   'Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi',
@@ -77,7 +76,6 @@ const validPlaces = // places.js
   // Islands
   'Greenland','Madagascar','Borneo','Sumatra','Sicily','Honshu','Great Britain','Iceland','Sri Lanka','Hawaii','Fiji','Maldives','Bali','Tasmania','New Guinea','Sardinia','Corsica','Puerto Rico','Jamaica','Cuba'
 ];
-  // ... (same as original, omitted for brevity];
 
 let roomId = null;
 let playerName = null;
@@ -89,7 +87,6 @@ let lastLetterGlobal = null;
 let gameStarted = false;
 let mySocketId = null;
 let countdownInterval = null;
-let bobbleInterval = null; // For constant bobbles
 
 const inputField = document.getElementById("countryInput");
 
@@ -146,6 +143,8 @@ function submitCountry() {
   showMessage("");
   socket.emit("submitCountry", { roomId, name: playerName, place: input });
   yourTurn = false;
+
+  
 }
 
 function giveUp() {
@@ -169,6 +168,7 @@ function resetUI(preGame = false) {
   document.getElementById("game").style.display = preGame ? "block" : "none";
 
   // Lobby container
+  // Leader who already has a room should not see create/join box
   if (preGame) {
     document.getElementById("lobby").style.display = isLeader ? "none" : "block";
   } else {
@@ -190,11 +190,17 @@ function resetUI(preGame = false) {
   updatePlayersList(players);
 
   // Winner modal logic
+  // Do NOT show winner modal in resetUI. Winner modal is handled separately in gameOver
   document.getElementById("winnerModal").style.display = "none";
+
 
   // Clear countdown
   if (countdownInterval) clearInterval(countdownInterval);
 }
+
+
+
+
 
 // --- SOCKET EVENTS ---
 socket.on("connect", () => { mySocketId = socket.id; });
@@ -214,12 +220,14 @@ socket.on("initState", ({ history, players: pl, turnIndex, lastLetter, started }
   updatePlayersList(players);
   updateHistory(history);
 
-  showGameUI(false);
+  // Show the game UI properly for midgame joiners
+  showGameUI(false);       // not leader
   if (gameStarted) {
     inputField.style.display = "block";
     document.querySelector(".buttons").style.display = "flex";
   }
 });
+
 
 socket.on("updatePlayers", (pl) => { players = pl; updatePlayersList(players); });
 socket.on("updateHistory", (history) => updateHistory(history));
@@ -233,41 +241,19 @@ socket.on("gameStarted", () => {
 });
 
 socket.on("gameOver", (winner) => {
-  const winnerName = document.getElementById("winnerName");
-  const modal = document.getElementById("winnerModal");
-
-  // Initial fade-in of modal
-  modal.style.display = "flex";
-  modal.style.opacity = "0";
-  setTimeout(() => {
-    modal.style.transition = "opacity 0.5s";
-    modal.style.opacity = "1";
-  }, 50);
-
-  // Dynamic winner message with delay
-  setTimeout(() => {
-    winnerName.innerHTML = winner.name === "No one" 
-      ? "No one wins!" 
-      : `<span class="winner-text">${winner.name}</span> wins with <span class="points-text">${winner.points}</span> points!`;
-    winnerName.style.opacity = "0";
-    setTimeout(() => {
-      winnerName.style.transition = "opacity 1s";
-      winnerName.style.opacity = "1";
-      
-      // Pop out emojis
-      createPartyEmojis();
-
-      // Start constant falling bobbles
-      bobbleInterval = setInterval(createSingleBobble, 200); // Create a new bobble every 200ms
-    }, 50);
-  }, 500);
-
-  // Disable input and buttons
+  document.getElementById("winnerName").innerText =
+    winner.name === "No one" ? "No one wins!" : `${winner.name} wins!`;
+  
+  // Show the winner modal with Play Again button
+  document.getElementById("winnerModal").style.display = "flex";
+  
+  // Disable input field and buttons
   inputField.style.display = "none";
   document.querySelector(".buttons").style.display = "none";
-
+  
   if (countdownInterval) clearInterval(countdownInterval);
 });
+
 
 socket.on("resetGame", () => {
   // Keep players list intact
@@ -294,6 +280,8 @@ socket.on("resetGame", () => {
 
   if (countdownInterval) clearInterval(countdownInterval);
 });
+
+
 
 socket.on("yourTurn", (lastLetter) => {
   yourTurn = true;
@@ -326,7 +314,7 @@ socket.on("notYourTurn", ({ playerName: currentPlayerName, lastLetter }) => {
   // Update the info text
   if (currentPlayerName) {
     if (lastLetter) {
-      document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer (letter starting with "${lastLetter.toUpperCase()}"...`;
+      document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer (letter starting with "${lastLetter.toUpperCase()}")...`;
     } else {
       document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer...`;
     }
@@ -335,20 +323,23 @@ socket.on("notYourTurn", ({ playerName: currentPlayerName, lastLetter }) => {
   }
 });
 
+
+
 // --- UTILITY ---
 function updatePlayersList(players) {
   const list = document.getElementById("playersList");
   list.innerHTML = "";
 
-  // Sort by points descending, then by isLeader (leader on top if tie)
-  const sortedPlayers = [...players].sort((a, b) => b.points - a.points || b.isLeader - a.isLeader);
+  // Show leader first
+  const sortedPlayers = [...players].sort((a,b) => b.isLeader - a.isLeader);
 
   sortedPlayers.forEach(p => {
     const li = document.createElement("li");
-    li.innerText = p.name + (p.isLeader ? " (Leader)" : "") + ` (${p.points} pts)`;
+    li.innerText = p.name + (p.isLeader ? " (Leader)" : "");
     list.appendChild(li);
   });
 }
+
 
 function updateHistory(history) {
   const list = document.getElementById("history");
@@ -367,11 +358,6 @@ function playAgain() {
 
   // Hide winner modal
   document.getElementById("winnerModal").style.display = "none";
-
-  // Stop and remove bobbles and emojis
-  if (bobbleInterval) clearInterval(bobbleInterval);
-  document.querySelectorAll(".bobble").forEach(b => b.remove());
-  document.querySelectorAll(".party-emoji").forEach(e => e.remove());
 
   // Reset game variables
   yourTurn = false;
@@ -393,36 +379,5 @@ function playAgain() {
   updatePlayersList(players);
 }
 
-// --- PARTY EMOJIS ---
-function createPartyEmojis() {
-  // Left emoji
-  const leftEmoji = document.createElement("div");
-  leftEmoji.className = "party-emoji left";
-  leftEmoji.innerHTML = "🎉";
-  document.body.appendChild(leftEmoji);
 
-  // Right emoji
-  const rightEmoji = document.createElement("div");
-  rightEmoji.className = "party-emoji right";
-  rightEmoji.innerHTML = "🎉";
-  document.body.appendChild(rightEmoji);
 
-  // Pop out animation
-  setTimeout(() => {
-    leftEmoji.style.transform = "scale(1) translateX(0)";
-    rightEmoji.style.transform = "scale(1) translateX(0)";
-  }, 50);
-}
-
-// --- CONSTANT FALLING BOBBLES ---
-function createSingleBobble() {
-  const bobble = document.createElement("div");
-  bobble.className = "bobble";
-  bobble.style.left = `${Math.random() * 100}%`; // Random horizontal position
-  bobble.style.animationDuration = `${2 + Math.random() * 3}s`; // Random fall duration (2-5s)
-  bobble.style.background = `hsl(${Math.random() * 360}, 70%, 50%)`; // Random color
-  document.body.appendChild(bobble);
-
-  // Remove bobble after animation
-  bobble.addEventListener("animationend", () => bobble.remove());
-}

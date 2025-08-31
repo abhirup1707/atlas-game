@@ -1,4 +1,3 @@
-
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -17,48 +16,45 @@ io.on("connection", (socket) => {
   console.log("Player connected:", socket.id);
 
   // --- CREATE ROOM ---
-
-socket.on("createRoom", (name) => {
-  const roomId = Math.random().toString(36).substring(2, 8);
-  rooms[roomId] = {
-    players: [{ id: socket.id, name, isLeader: true }], // mark leader
-    history: [],
-    turnIndex: 0,
-    lastLetter: null,
-    started: false,
-    leaderId: socket.id,
-    used: new Set(),
-  };
-  socket.join(roomId);
-  io.to(roomId).emit("roomCreated", roomId);
-  io.to(roomId).emit("updatePlayers", rooms[roomId].players);
-});
-
-
-  // --- JOIN ROOM ---
-socket.on("joinRoom", ({ roomId, playerName }) => {
-  const room = rooms[roomId];
-  if (!room) {
-    socket.emit("errorMessage", "Room does not exist");
-    return;
-  }
-
-  const newPlayer = { id: socket.id, name: playerName, active: true, isLeader: false };
-  room.players.push(newPlayer);
-  socket.join(roomId);
-
-  // Send full game state to the new player
-  socket.emit("initState", {
-    history: room.history,
-    players: room.players,
-    turnIndex: room.turnIndex,
-    lastLetter: room.lastLetter,
-    started: room.started
+  socket.on("createRoom", (name) => {
+    const roomId = Math.random().toString(36).substring(2, 8);
+    rooms[roomId] = {
+      players: [{ id: socket.id, name, isLeader: true, points: 0 }], // add points
+      history: [],
+      turnIndex: 0,
+      lastLetter: null,
+      started: false,
+      leaderId: socket.id,
+      used: new Set(),
+    };
+    socket.join(roomId);
+    io.to(roomId).emit("roomCreated", roomId);
+    io.to(roomId).emit("updatePlayers", rooms[roomId].players);
   });
 
-  io.to(roomId).emit("updatePlayers", room.players);
-});
+  // --- JOIN ROOM ---
+  socket.on("joinRoom", ({ roomId, playerName }) => {
+    const room = rooms[roomId];
+    if (!room) {
+      socket.emit("errorMessage", "Room does not exist");
+      return;
+    }
 
+    const newPlayer = { id: socket.id, name: playerName, active: true, isLeader: false, points: 0 }; // add points
+    room.players.push(newPlayer);
+    socket.join(roomId);
+
+    // Send full game state to the new player
+    socket.emit("initState", {
+      history: room.history,
+      players: room.players,
+      turnIndex: room.turnIndex,
+      lastLetter: room.lastLetter,
+      started: room.started
+    });
+
+    io.to(roomId).emit("updatePlayers", room.players);
+  });
 
   // --- START GAME ---
   socket.on("startGame", (roomId) => {
@@ -68,13 +64,17 @@ socket.on("joinRoom", ({ roomId, playerName }) => {
     room.started = true;
     room.turnIndex = 0;
     room.lastLetter = null;
-    room.used = new Set(); 
+    room.used = new Set();
+    room.players.forEach(p => p.points = 0); // reset points
 
     io.to(roomId).emit("gameStarted");
+    io.to(roomId).emit("updatePlayers", room.players); // emit updated players
     startPlayerTurn(roomId);
   });
 
   // --- SUBMIT COUNTRY ---
+// ... (previous code unchanged until submitCountry)
+
 socket.on("submitCountry", ({ roomId, name, place }) => {
   const room = rooms[roomId];
   if (!room) return;
@@ -88,7 +88,6 @@ socket.on("submitCountry", ({ roomId, name, place }) => {
   });
   if (alreadyUsed) {
     socket.emit("message", `${place} is already used! Try another word.`);
-    // 👇 Explicitly tell client it's still their turn
     socket.emit("yourTurn", { lastLetter: room.lastLetter });
     return;
   }
@@ -96,11 +95,29 @@ socket.on("submitCountry", ({ roomId, name, place }) => {
   // ✅ Check last letter
   if (room.lastLetter && lowerPlace[0] !== room.lastLetter) {
     socket.emit("message", `Must start with "${room.lastLetter.toUpperCase()}"!`);
-    socket.emit("yourTurn", { lastLetter: room.lastLetter }); // 👈 keep their turn
+    socket.emit("yourTurn", { lastLetter: room.lastLetter });
     return;
   }
 
-  // ✅ Word is valid → clear timer and proceed
+  // Calculate points based on time remaining
+  const timeTaken = (Date.now() - room.turnStartTime) / 1000;
+  const timeRemaining = Math.max(0, 20 - timeTaken); // 20s turn limit
+  let pointsEarned;
+  if (timeRemaining >= 15) {
+    pointsEarned = 200 - (20 - timeRemaining) * 5; // Linear decrease from 200 at 20s
+  } else if (timeRemaining >= 14) {
+    pointsEarned = 150 - (15 - timeRemaining) * 10; // Drop to 140 at 14s
+  } else {
+    pointsEarned = Math.max(0, 140 - (14 - timeRemaining) * 10); // Further decrease
+  }
+  pointsEarned = Math.floor(pointsEarned); // Ensure integer points
+
+  const player = room.players.find(p => p.name === name);
+  if (player) {
+    player.points += pointsEarned > 0 ? pointsEarned : 0; // Only add positive points
+  }
+
+  // Proceed
   if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
 
   room.history.push(`${name}: ${place}`);
@@ -108,13 +125,13 @@ socket.on("submitCountry", ({ roomId, name, place }) => {
 
   room.turnIndex = (room.turnIndex + 1) % room.players.length;
   io.to(roomId).emit("updateHistory", room.history);
+  io.to(roomId).emit("updatePlayers", room.players);
 
   checkGameOver(roomId);
   startPlayerTurn(roomId);
 });
 
-
-
+// ... (rest of the code unchanged)
 
   // --- GIVE UP ---
   socket.on("giveUp", ({ roomId, name }) => {
@@ -139,31 +156,22 @@ socket.on("submitCountry", ({ roomId, name, place }) => {
   });
 
   // --- PLAY AGAIN ---
-// --- PLAY AGAIN ---
-// --- PLAY AGAIN ---
-socket.on("playAgain", (roomId) => {
-  const room = rooms[roomId];
-  if (!room) return;
+  socket.on("playAgain", (roomId) => {
+    const room = rooms[roomId];
+    if (!room) return;
 
-  const leader = room.players.find(p => p.id === room.leaderId); // find leader explicitly
-  room.players = leader ? [leader] : []; // keep only leader
+    const leader = room.players.find(p => p.id === room.leaderId);
+    room.players = leader ? [leader] : [];
+    room.players.forEach(p => p.points = 0); // reset points
 
-  room.history = [];
-  room.turnIndex = 0;
-  room.lastLetter = null;
-  room.started = false;
-  room.used = new Set(); 
-  io.to(roomId).emit("resetGame"); // client resets UI
-  io.to(roomId).emit("updatePlayers", room.players); // show leader in players list
-});
-
-
-
-
-
-
-
-
+    room.history = [];
+    room.turnIndex = 0;
+    room.lastLetter = null;
+    room.started = false;
+    room.used = new Set();
+    io.to(roomId).emit("resetGame");
+    io.to(roomId).emit("updatePlayers", room.players);
+  });
 
   // --- DISCONNECT ---
   socket.on("disconnect", () => {
@@ -180,44 +188,46 @@ socket.on("playAgain", (roomId) => {
 
   // --- HELPERS ---
   function startPlayerTurn(roomId) {
-  const room = rooms[roomId];
-  if (!room || room.players.length === 0) return;
+    const room = rooms[roomId];
+    if (!room || room.players.length === 0) return;
 
-  const currentPlayer = room.players[room.turnIndex];
+    room.turnStartTime = Date.now(); // start time for turn
 
-  // Tell everyone whose turn it is and the required starting letter
-  room.players.forEach(p => {
-    if (p.id === currentPlayer.id) {
-      io.to(p.id).emit("yourTurn", room.lastLetter);
-    } else {
-      io.to(p.id).emit("notYourTurn", {
-        playerName: currentPlayer.name,
-        lastLetter: room.lastLetter
-      });
-    }
-  });
+    const currentPlayer = room.players[room.turnIndex];
 
-  // Reset any old timeout
-  if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
+    // Tell everyone whose turn it is and the required starting letter
+    room.players.forEach(p => {
+      if (p.id === currentPlayer.id) {
+        io.to(p.id).emit("yourTurn", room.lastLetter);
+      } else {
+        io.to(p.id).emit("notYourTurn", {
+          playerName: currentPlayer.name,
+          lastLetter: room.lastLetter
+        });
+      }
+    });
 
-  // Start countdown (20s)
-  turnTimeouts[roomId] = setTimeout(() => {
-    io.to(roomId).emit("message", `${currentPlayer.name} ran out of time and is disqualified!`);
+    // Reset old timeout
+    if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
 
-    // Remove the player
-    room.players = room.players.filter(p => p.id !== currentPlayer.id);
-    io.to(roomId).emit("updatePlayers", room.players);
+    // Start countdown (20s)
+    turnTimeouts[roomId] = setTimeout(() => {
+      io.to(roomId).emit("message", `${currentPlayer.name} ran out of time and is disqualified!`);
 
-    checkGameOver(roomId);
+      // Remove the player
+      room.players = room.players.filter(p => p.id !== currentPlayer.id);
+      io.to(roomId).emit("updatePlayers", room.players);
 
-    if (room.players.length > 1) {
-      if (room.turnIndex >= room.players.length) room.turnIndex = 0;
-      startPlayerTurn(roomId);
-    }
-  }, 20000);
-}
+      checkGameOver(roomId);
 
+      if (room.players.length > 1) {
+        if (room.turnIndex >= room.players.length) room.turnIndex = 0;
+        startPlayerTurn(roomId);
+      }
+    }, 20000);
+  }
 
+// ... (previous code unchanged until checkGameOver)
 
 function checkGameOver(roomId) {
   const room = rooms[roomId];
@@ -225,17 +235,15 @@ function checkGameOver(roomId) {
 
   if (room.players.length === 1) {
     const winner = room.players[0];
-    io.to(roomId).emit("gameOver", { name: winner.name });
-    // Do NOT reset yet — wait for playAgain
+    io.to(roomId).emit("gameOver", { name: winner.name, points: winner.points });
   } else if (room.players.length === 0) {
-    io.to(roomId).emit("gameOver", { name: "No one" });
+    io.to(roomId).emit("gameOver", { name: "No one", points: 0 });
     if (turnTimeouts[roomId]) clearTimeout(turnTimeouts[roomId]);
     delete rooms[roomId];
   }
 }
 
-
-
+// ... (rest of the code unchanged)
 });
 
 // --- SERVER ---
