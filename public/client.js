@@ -1,5 +1,5 @@
 const socket = io();
-const validPlaces = // places.js
+const validPlaces =// places.js
 [
   // Countries
   'Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan',
@@ -77,8 +77,6 @@ const validPlaces = // places.js
   // Islands
   'Greenland','Madagascar','Borneo','Sumatra','Sicily','Honshu','Great Britain','Iceland','Sri Lanka','Hawaii','Fiji','Maldives','Bali','Tasmania','New Guinea','Sardinia','Corsica','Puerto Rico','Jamaica','Cuba'
 ];
-  // ... (same as original, omitted for brevity)
-
 
 let roomId = null;
 let playerName = null;
@@ -193,12 +191,13 @@ function updatePlayersList(players) {
 
 function updateHistory(history) {
   const list = document.getElementById("history");
-  list.innerHTML = "";
-  history.forEach(h => {
+  list.innerHTML = ""; // Clear existing entries
+  history.slice(-20).forEach(h => { // Limit to last 20 entries
     const li = document.createElement("li");
     li.innerText = h;
     list.appendChild(li);
   });
+  list.scrollTop = 0; // Scroll to top for newest entries
   console.log("History updated:", history); // Log updated history
 }
 

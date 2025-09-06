@@ -6,6 +6,89 @@
   <title>🌍 Atlas Multiplayer Game</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Inline CSS for immediate effect, move to style.css later if preferred */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f0f0;
+      height: 100vh;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    #game {
+      display: flex;
+      flex-grow: 1;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .game-content {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      justify-content: space-between;
+    }
+    .main-game {
+      flex-grow: 1;
+      padding-right: 20px;
+    }
+    .sidebar {
+      width: 300px;
+      background-color: #fff;
+      border-left: 1px solid #ccc;
+      overflow-y: auto;
+      max-height: 80vh;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    #history, #playersList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column-reverse; /* New entries at the top */
+    }
+    #history li, #playersList li {
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .game-content {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        max-height: 200px;
+        margin-top: 20px;
+      }
+      .main-game {
+        padding-right: 0;
+      }
+    }
+    /* Ensure modal and other existing styles work */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -33,9 +116,9 @@
         <option value="14">14 Rounds</option>
         <option value="15">15 Rounds</option>
       </select>
-      <button id="createRoomBtn" onclick="createRoom()">Create Room</button> <!-- Updated ID -->
+      <button id="createRoomBtn" onclick="createRoom()">Create Room</button>
       <input id="roomIdInput" placeholder="Room ID (if joining)" aria-label="Room ID">
-      <button id="joinRoomBtn" onclick="joinRoom()">Join Room</button> <!-- Updated ID for consistency -->
+      <button id="joinRoomBtn" onclick="joinRoom()">Join Room</button>
     </div>
 
     <!-- Game Area -->
