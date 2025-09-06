@@ -219,6 +219,9 @@ io.on("connection", (socket) => {
     room.history.push(`${name}: ${place}`);
     room.lastLetter = lowerPlace[lowerPlace.length - 1];
 
+    // Broadcast the submitted place for image update
+    io.to(roomId).emit("updateImage", place);
+
     room.turnIndex = (room.turnIndex + 1) % room.players.length;
     io.to(roomId).emit("updateHistory", room.history);
     io.to(roomId).emit("updatePlayers", room.players);

@@ -1,5 +1,5 @@
 const socket = io();
-const validPlaces =// places.js
+const validPlaces = // places.js
 [
   // Countries
   'Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan',
@@ -88,11 +88,35 @@ let lastLetterGlobal = null;
 let gameStarted = false;
 let mySocketId = null;
 let countdownInterval = null;
-let bobbleInterval = null; // For constant bobbles
+let bobbleInterval = null;
 
 const inputField = document.getElementById("countryInput");
 const startGameBtn = document.getElementById("startGameBtn");
 const createRoomBtn = document.getElementById("createRoomBtn");
+const countryImage = document.getElementById("countryImage");
+
+// Function to fetch image from Pexels API (replace with your API key)
+async function fetchPlaceImage(place) {
+  const apiKey = "iq9AWxAKJEfoEQlH6AdK72Bi1BQ6qMF6Oo0ootH1XhJqF5vnUeT2Er8l"; // Sign up at https://www.pexels.com/api/ to get a key
+  try {
+    const response = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(place)}&per_page=1`,
+      {
+        headers: {
+          Authorization: apiKey
+        }
+      }
+    );
+    const data = await response.json();
+    if (data.photos && data.photos.length > 0) {
+      return data.photos[0].src.original; // Pexels uses 'src.original' for the full-size image
+    }
+    return null; // Return null if no image found, no error handling
+  } catch (error) {
+    console.error("Error fetching image:", error);
+    return null; // Silently fail on error
+  }
+}
 
 // Global function definitions
 window.submitCountry = function submitCountry() {
@@ -146,6 +170,8 @@ function resetUI(preGame = false) {
   gameStarted = false;
   currentTurn = 0;
   lastLetterGlobal = null;
+  countryImage.style.display = "none";
+  countryImage.src = "";
 
   // Game container
   document.getElementById("game").style.display = preGame ? "block" : "none";
@@ -178,7 +204,6 @@ function updatePlayersList(players) {
   const list = document.getElementById("playersList");
   list.innerHTML = "";
 
-  // Sort by points descending, then by isLeader (leader on top if tie)
   const sortedPlayers = [...players].sort((a, b) => b.points - a.points || b.isLeader - a.isLeader);
 
   sortedPlayers.forEach(p => {
@@ -186,40 +211,37 @@ function updatePlayersList(players) {
     li.innerText = p.name + (p.isLeader ? " (Leader)" : "") + ` (${p.points} pts)`;
     list.appendChild(li);
   });
-  console.log("Players list updated with points:", players.map(p => ({ name: p.name, points: p.points }))); // Detailed points log
+  console.log("Players list updated with points:", players.map(p => ({ name: p.name, points: p.points })));
 }
 
 function updateHistory(history) {
   const list = document.getElementById("history");
-  list.innerHTML = ""; // Clear existing entries
-  history.slice(-20).forEach(h => { // Limit to last 20 entries
+  list.innerHTML = "";
+  history.slice(-20).forEach(h => {
     const li = document.createElement("li");
     li.innerText = h;
     list.appendChild(li);
   });
-  list.scrollTop = 0; // Scroll to top for newest entries
-  console.log("History updated:", history); // Log updated history
+  list.scrollTop = 0;
+  console.log("History updated:", history);
 }
 
 function showMessage(msg) { 
   document.getElementById("message").innerText = msg;
-  console.log("Message displayed:", msg); // Log messages
+  console.log("Message displayed:", msg);
 }
 
 function createPartyEmojis() {
-  // Left emoji
   const leftEmoji = document.createElement("div");
   leftEmoji.className = "party-emoji left";
   leftEmoji.innerHTML = "🎉";
   document.body.appendChild(leftEmoji);
 
-  // Right emoji
   const rightEmoji = document.createElement("div");
   rightEmoji.className = "party-emoji right";
   rightEmoji.innerHTML = "🎉";
   document.body.appendChild(rightEmoji);
 
-  // Pop out animation
   setTimeout(() => {
     leftEmoji.style.transform = "scale(1) translateX(0)";
     rightEmoji.style.transform = "scale(1) translateX(0)";
@@ -229,25 +251,22 @@ function createPartyEmojis() {
 function createSingleBobble() {
   const bobble = document.createElement("div");
   bobble.className = "bobble";
-  bobble.style.left = `${Math.random() * 100}%`; // Random horizontal position
-  bobble.style.animationDuration = `${2 + Math.random() * 3}s`; // Random fall duration (2-5s)
-  bobble.style.background = `hsl(${Math.random() * 360}, 70%, 50%)`; // Random color
+  bobble.style.left = `${Math.random() * 100}%`;
+  bobble.style.animationDuration = `${2 + Math.random() * 3}s`;
+  bobble.style.background = `hsl(${Math.random() * 360}, 70%, 50%)`;
   document.body.appendChild(bobble);
 
-  // Remove bobble after animation
   bobble.addEventListener("animationend", () => bobble.remove());
 }
 
-// Ensure DOM is ready before any UI manipulation
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM fully loaded, initializing client.js");
   initializeUI();
-  createRoomBtn.addEventListener("click", createRoom); // Fallback event listener
-  console.log("submitCountry defined:", typeof window.submitCountry === "function"); // Verify function is defined
+  createRoomBtn.addEventListener("click", createRoom);
+  console.log("submitCountry defined:", typeof window.submitCountry === "function");
 });
 
 function initializeUI() {
-  // --- CREATE / JOIN ROOM ---
   window.createRoom = function createRoom() {
     playerName = document.getElementById("playerName").value.trim();
     const rounds = parseInt(document.getElementById("roundsSelect").value);
@@ -265,34 +284,32 @@ function initializeUI() {
     console.log("Join Room triggered with name:", playerName, "roomId:", roomId);
   };
 
-  // --- GAME UI ---
   function showGameUI(leader) {
     isLeader = leader;
     document.getElementById("lobby").style.display = "none";
     document.getElementById("game").style.display = "block";
     document.getElementById("roomTitle").innerText = "Room: " + roomId;
-    startGameBtn.style.display = leader && !gameStarted ? "inline-block" : "none"; // Set button visibility
-    inputField.style.display = gameStarted ? "block" : "none"; // Show input only when game starts
-    document.querySelector(".buttons").style.display = gameStarted ? "flex" : "none"; // Show buttons only when game starts
-    updatePlayersList(players); // Ensure players list is shown
+    startGameBtn.style.display = leader && !gameStarted ? "inline-block" : "none";
+    inputField.style.display = gameStarted ? "block" : "none";
+    document.querySelector(".buttons").style.display = gameStarted ? "flex" : "none";
+    updatePlayersList(players);
     console.log("UI State - Leader:", leader, "Game Started:", gameStarted, "Start Button Display:", startGameBtn ? startGameBtn.style.display : "null", "Button Exists:", !!startGameBtn);
     if (leader && !gameStarted && startGameBtn) {
       if (startGameBtn.style.display !== "inline-block") {
         console.warn("Force showing Start Game button due to display issue");
-        startGameBtn.style.display = "inline-block"; // Fallback to force display
-        startGameBtn.style.visibility = "visible"; // Ensure visibility
+        startGameBtn.style.display = "inline-block";
+        startGameBtn.style.visibility = "visible";
       }
     }
   }
 
-  // --- START / SUBMIT / GIVE UP ---
   window.startGame = function startGame() {
     if (!isLeader || !roomId) return;
     socket.emit("startGame", roomId);
-    startGameBtn.style.display = "none"; // Hide start button after starting
-    gameStarted = true; // Set gameStarted to true
-    inputField.style.display = "block"; // Show input
-    document.querySelector(".buttons").style.display = "flex"; // Show buttons
+    startGameBtn.style.display = "none";
+    gameStarted = true;
+    inputField.style.display = "block";
+    document.querySelector(".buttons").style.display = "flex";
     console.log("Game started, roomId:", roomId);
   };
 
@@ -301,45 +318,34 @@ function initializeUI() {
 
   window.playAgain = function playAgain() {
     socket.emit("playAgain", roomId);
-
-    // Hide winner modal
     document.getElementById("winnerModal").style.display = "none";
-
-    // Stop and remove bobbles and emojis
     if (bobbleInterval) clearInterval(bobbleInterval);
     document.querySelectorAll(".bobble").forEach(b => b.remove());
     document.querySelectorAll(".party-emoji").forEach(e => e.remove());
-
-    // Reset game variables
     yourTurn = false;
     gameStarted = false;
     currentTurn = 0;
     lastLetterGlobal = null;
+    countryImage.style.display = "none";
+    countryImage.src = "";
     document.getElementById("history").innerHTML = "";
     showMessage("");
     document.getElementById("turnInfo").innerText = "";
     inputField.style.display = "none";
     inputField.disabled = false;
     document.querySelector(".buttons").style.display = "none";
-
-    // Show start game button only for leader
-    if (startGameBtn) {
-      startGameBtn.style.display = isLeader ? "inline-block" : "none";
-    }
-
-    // Show pre-game UI and keep players visible
+    if (startGameBtn) startGameBtn.style.display = isLeader ? "inline-block" : "none";
     document.getElementById("lobby").style.display = isLeader ? "none" : "block";
     updatePlayersList(players);
   };
 
-  // --- SOCKET EVENTS ---
   socket.on("connect", () => { mySocketId = socket.id; console.log("Socket connected, mySocketId:", mySocketId); });
 
   socket.on("roomCreated", (data) => {
     roomId = data.id;
     isLeader = true;
     players = [{ name: playerName, points: 0, isLeader: true, socketId: socket.id, turnsRemaining: data.rounds * 5 }];
-    setTimeout(() => showGameUI(true), 0); // Delay to ensure DOM update
+    setTimeout(() => showGameUI(true), 0);
     console.log("Room Created - RoomID:", roomId, "Leader:", isLeader, "Players:", players, "Data:", data);
   });
 
@@ -348,11 +354,9 @@ function initializeUI() {
     currentTurn = turnIndex;
     lastLetterGlobal = lastLetter;
     gameStarted = started;
-
     updatePlayersList(players);
     updateHistory(history);
-
-    showGameUI(false); // Show UI for joiners
+    showGameUI(false);
     if (gameStarted) {
       inputField.style.display = "block";
       document.querySelector(".buttons").style.display = "flex";
@@ -363,12 +367,12 @@ function initializeUI() {
   socket.on("updatePlayers", (pl) => {
     players = pl;
     updatePlayersList(players);
-    console.log("Players data received from server:", pl.map(p => ({ name: p.name, points: p.points }))); // Log received points
+    console.log("Players data received from server:", pl.map(p => ({ name: p.name, points: p.points })));
   });
 
   socket.on("updateHistory", (history) => {
     updateHistory(history);
-    console.log("History updated:", history); // Log updated history
+    console.log("History updated:", history);
   });
 
   socket.on("message", showMessage);
@@ -381,7 +385,7 @@ function initializeUI() {
     console.log("Game started event received, roomId:", roomId);
   });
 
-  socket.on("yourTurn", ({ lastLetter }) => { // Destructure the object to get the string
+  socket.on("yourTurn", ({ lastLetter }) => {
     yourTurn = true;
     lastLetterGlobal = lastLetter;
     inputField.disabled = false;
@@ -395,11 +399,11 @@ function initializeUI() {
     if (countdownInterval) clearInterval(countdownInterval);
     countdownInterval = setInterval(() => {
       timeLeft--;
-      console.log("Timer tick, timeLeft:", timeLeft); // Log timer updates
+      console.log("Timer tick, timeLeft:", timeLeft);
       document.getElementById("turnInfo").innerText = lastLetter ? `Your turn! Start with "${lastLetter.toUpperCase()}" (${timeLeft}s)` : `Your turn! (${timeLeft}s)`;
       if (timeLeft <= 0) {
         clearInterval(countdownInterval);
-        yourTurn = false; // Auto-end turn on timeout
+        yourTurn = false;
         document.getElementById("turnInfo").innerText = "Time's up!";
         console.log("Turn timed out, yourTurn set to false");
       }
@@ -411,19 +415,13 @@ function initializeUI() {
     inputField.disabled = true;
     console.log("Not your turn, current player:", currentPlayerName, "lastLetter:", lastLetter);
 
-    // Stop any running countdown
     if (countdownInterval) {
       clearInterval(countdownInterval);
       countdownInterval = null;
     }
 
-    // Update the info text
     if (currentPlayerName) {
-      if (lastLetter) {
-        document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer (letter starting with "${lastLetter.toUpperCase()}"...`;
-      } else {
-        document.getElementById("turnInfo").innerText = `Waiting for ${currentPlayerName} to answer...`;
-      }
+      document.getElementById("turnInfo").innerText = lastLetter ? `Waiting for ${currentPlayerName} to answer (letter starting with "${lastLetter.toUpperCase()}"...` : `Waiting for ${currentPlayerName} to answer...`;
     } else {
       document.getElementById("turnInfo").innerText = "Waiting for other players...";
     }
@@ -432,8 +430,6 @@ function initializeUI() {
   socket.on("gameOver", (winner) => {
     const winnerName = document.getElementById("winnerName");
     const modal = document.getElementById("winnerModal");
-
-    // Initial fade-in of modal
     modal.style.display = "flex";
     modal.style.opacity = "0";
     setTimeout(() => {
@@ -441,7 +437,6 @@ function initializeUI() {
       modal.style.opacity = "1";
     }, 50);
 
-    // Dynamic winner message with delay
     setTimeout(() => {
       winnerName.innerHTML = winner.name === "No one" 
         ? "No one wins!" 
@@ -450,47 +445,41 @@ function initializeUI() {
       setTimeout(() => {
         winnerName.style.transition = "opacity 1s";
         winnerName.style.opacity = "1";
-        
-        // Pop out emojis
         createPartyEmojis();
-
-        // Start constant falling bobbles
-        bobbleInterval = setInterval(createSingleBobble, 200); // Create a new bobble every 200ms
+        bobbleInterval = setInterval(createSingleBobble, 200);
       }, 50);
     }, 500);
 
-    // Disable input and buttons
     inputField.style.display = "none";
     document.querySelector(".buttons").style.display = "none";
-
     if (countdownInterval) clearInterval(countdownInterval);
   });
 
-  socket.on("resetGame", () => {
-    // Keep players list intact
-    updatePlayersList(players);
+  socket.on("updateImage", async (place) => {
+    const imageUrl = await fetchPlaceImage(place);
+    if (imageUrl) {
+      countryImage.src = imageUrl;
+      countryImage.style.display = "block";
+    } // No change if null, keeps previous image or hides if none set
+  });
 
-    // Show pre-game UI
+  socket.on("resetGame", () => {
+    updatePlayersList(players);
     document.getElementById("lobby").style.display = isLeader ? "none" : "block";
     document.getElementById("game").style.display = "block";
-
-    // Show start button for leader
-    if (startGameBtn) {
-      startGameBtn.style.display = isLeader ? "inline-block" : "none";
-    }
-
-    // Reset game variables
+    if (startGameBtn) startGameBtn.style.display = isLeader ? "inline-block" : "none";
     yourTurn = false;
     gameStarted = false;
     currentTurn = 0;
     lastLetterGlobal = null;
+    countryImage.style.display = "none";
+    countryImage.src = "";
     document.getElementById("history").innerHTML = "";
     showMessage("");
     document.getElementById("turnInfo").innerText = "";
     inputField.style.display = "none";
     inputField.disabled = false;
     document.querySelector(".buttons").style.display = "none";
-
     if (countdownInterval) clearInterval(countdownInterval);
     console.log("Game reset, Leader:", isLeader, "Start Button Display:", startGameBtn ? startGameBtn.style.display : "null");
   });

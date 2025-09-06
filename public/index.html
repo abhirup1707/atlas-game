@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Inline CSS for immediate effect, move to style.css later if preferred */
     body {
       margin: 0;
       padding: 0;
@@ -50,11 +49,20 @@
       padding: 0;
       margin: 0;
       display: flex;
-      flex-direction: column-reverse; /* New entries at the top */
+      flex-direction: column-reverse;
     }
     #history li, #playersList li {
       padding: 5px 0;
       border-bottom: 1px solid #eee;
+    }
+    #countryImage {
+      display: none;
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     /* Responsive Design */
     @media (max-width: 768px) {
@@ -69,8 +77,11 @@
       .main-game {
         padding-right: 0;
       }
+      #countryImage {
+        display: block; /* Show image on mobile */
+      }
     }
-    /* Ensure modal and other existing styles work */
+    /* Modal Styles (for loading/error states) */
     .modal {
       position: fixed;
       top: 0;
@@ -81,6 +92,7 @@
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      display: none;
     }
     .modal-content {
       background-color: white;
@@ -143,6 +155,7 @@
           <ul id="history"></ul>
         </div>
       </div>
+      <img id="countryImage" alt="Image of the submitted place">
     </div>
 
     <!-- Winner Modal -->
@@ -152,13 +165,21 @@
         <button onclick="playAgain()" class="play-again-btn" aria-label="Play again">Play Again</button>
       </div>
     </div>
+
+    <!-- Loading/Error Modal -->
+    <div id="imageModal" class="modal">
+      <div class="modal-content">
+        <p id="imageModalMessage">Loading image...</p>
+      </div>
+    </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    // Ensure winner modal is hidden on page load
+    // Ensure modals are hidden on page load
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("winnerModal").style.display = "none";
+      document.getElementById("imageModal").style.display = "none";
     });
   </script>
   <script src="client.js"></script>

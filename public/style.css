@@ -131,6 +131,22 @@ ul li {
   gap: 15px;
 }
 
+/* Dynamic Image */
+#countryImage {
+  display: none;
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: opacity 0.3s ease;
+}
+
+#countryImage.loading {
+  opacity: 0.6;
+}
+
 /* Modal styles */
 .modal {
   display: none;
@@ -143,10 +159,11 @@ ul li {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  transition: opacity 0.3s ease;
 }
 
 .modal-content {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   padding: 40px;
   border-radius: 20px;
   text-align: center;
@@ -156,18 +173,25 @@ ul li {
   position: relative;
 }
 
-.winner-message {
+.modal-content p {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+/* Winner Modal */
+#winnerModal .winner-message {
   margin-bottom: 20px;
   font-size: 24px;
   color: #333;
 }
 
-.winner-text {
+#winnerModal .winner-text {
   color: #2e7d32; /* Green for winner name */
   font-weight: bold;
 }
 
-.points-text {
+#winnerModal .points-text {
   color: #d81b60; /* Pink for points */
   font-weight: bold;
 }
@@ -256,5 +280,10 @@ ul li {
 
   .party-emoji {
     font-size: 60px; /* Smaller on mobile */
+  }
+
+  #countryImage {
+    display: block; /* Show image on mobile */
+    max-height: 200px; /* Adjusted for smaller screens */
   }
 }
