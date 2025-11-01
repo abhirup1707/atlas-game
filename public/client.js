@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io("https://atlas-game-4w24.onrender.com");
 const validPlaces = // places.js
 [
   // Countries
@@ -316,28 +316,11 @@ function initializeUI() {
   window.giveUp = giveUp;
   window.leaveRoom = leaveRoom;
 
-  window.playAgain = function playAgain() {
-    socket.emit("playAgain", roomId);
-    document.getElementById("winnerModal").style.display = "none";
-    if (bobbleInterval) clearInterval(bobbleInterval);
-    document.querySelectorAll(".bobble").forEach(b => b.remove());
-    document.querySelectorAll(".party-emoji").forEach(e => e.remove());
-    yourTurn = false;
-    gameStarted = false;
-    currentTurn = 0;
-    lastLetterGlobal = null;
-    countryImage.style.display = "none";
-    countryImage.src = "";
-    document.getElementById("history").innerHTML = "";
-    showMessage("");
-    document.getElementById("turnInfo").innerText = "";
-    inputField.style.display = "none";
-    inputField.disabled = false;
-    document.querySelector(".buttons").style.display = "none";
-    if (startGameBtn) startGameBtn.style.display = isLeader ? "inline-block" : "none";
-    document.getElementById("lobby").style.display = isLeader ? "none" : "block";
-    updatePlayersList(players);
-  };
+window.playAgain = function playAgain() {
+  // Reset everything: emulate a full site refresh
+  window.location.reload();
+};
+
 
   socket.on("connect", () => { mySocketId = socket.id; console.log("Socket connected, mySocketId:", mySocketId); });
 
@@ -427,33 +410,55 @@ function initializeUI() {
     }
   });
 
-  socket.on("gameOver", (winner) => {
-    const winnerName = document.getElementById("winnerName");
-    const modal = document.getElementById("winnerModal");
-    modal.style.display = "flex";
-    modal.style.opacity = "0";
-    setTimeout(() => {
-      modal.style.transition = "opacity 0.5s";
-      modal.style.opacity = "1";
-    }, 50);
+socket.on("gameOver", (winner) => {
+  const winnerName = document.getElementById("winnerName");
+  const modal = document.getElementById("winnerModal");
 
-    setTimeout(() => {
-      winnerName.innerHTML = winner.name === "No one" 
-        ? "No one wins!" 
-        : `<span class="winner-text">${winner.name}</span> wins with <span class="points-text">${winner.points}</span> points!`;
-      winnerName.style.opacity = "0";
-      setTimeout(() => {
-        winnerName.style.transition = "opacity 1s";
-        winnerName.style.opacity = "1";
-        createPartyEmojis();
-        bobbleInterval = setInterval(createSingleBobble, 200);
-      }, 50);
-    }, 500);
+  // Winning animation emojis
+  document.getElementById("win-animation").innerHTML =
+    `<span class="win-emoji">🎉</span>
+     <span class="win-emoji">🏆</span>
+     <span class="win-emoji">✨</span>
+     <span class="win-emoji">🎊</span>`;
 
-    inputField.style.display = "none";
-    document.querySelector(".buttons").style.display = "none";
-    if (countdownInterval) clearInterval(countdownInterval);
-  });
+  modal.style.display = "flex";
+  modal.style.opacity = "0";
+  setTimeout(() => {
+    modal.style.transition = "opacity 0.5s";
+    modal.style.opacity = "1";
+  }, 50);
+
+  setTimeout(() => {
+    winnerName.innerHTML = winner.name === "No one"
+      ? "No one wins!"
+      : `<span class="winner-text">${winner.name}</span> wins with <span class="points-text">${winner.points}</span> points!`;
+    winnerName.style.opacity = "0";
+    setTimeout(() => {
+      winnerName.style.transition = "opacity 1s";
+      winnerName.style.opacity = "1";
+      createPartyEmojis();
+      bobbleInterval = setInterval(createSingleBobble, 200);
+      // Confetti burst!
+      if (winner.name !== "No one") for (let i = 0; i < 36; i++) showConfetti();
+      // Play Again button: always visible in the popup!
+      document.getElementById("playAgainBtn").style.display = "inline-block";
+    }, 60);
+  }, 500);
+
+  inputField.style.display = "none";
+  document.querySelector(".buttons").style.display = "none";
+  if (countdownInterval) clearInterval(countdownInterval);
+});
+
+// Confetti helper:
+function showConfetti() {
+  const conf = document.createElement("div");
+  conf.className = "confetti";
+  conf.style.left = `${Math.random() * 90 + 3}vw`;
+  conf.style.background = `hsl(${Math.floor(Math.random() * 360)},83%,67%)`;
+  document.body.appendChild(conf);
+  setTimeout(() => conf.remove(), 1900);
+}
 
   socket.on("updateImage", async (place) => {
     const imageUrl = await fetchPlaceImage(place);

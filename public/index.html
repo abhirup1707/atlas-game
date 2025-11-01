@@ -5,102 +5,289 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🌍 Atlas Multiplayer Game</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-      background-color: #f0f0f0;
-      height: 100vh;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-    #game {
-      display: flex;
-      flex-grow: 1;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    .game-content {
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-      justify-content: space-between;
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(120deg, #e4ecfb 0%, #c7ffd8 100%);
+    height: 100vh;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-height: 100vh;
+  }
+  header {
+    background: #fff;
+    padding: 28px 0 18px 0;
+    box-shadow: 0 6px 22px rgba(60, 60, 110, 0.06);
+    text-align: center;
+  }
+  header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #26315f;
+    letter-spacing: 1px;
+  }
+  .card {
+    background: #fff;
+    box-shadow: 0 8px 32px rgba(60,60,120,0.10), 0 1.5px 4px rgba(100,100,140,0.08);
+    border-radius: 18px;
+    width: 97%;
+    max-width: 1420px;
+    padding: 36px 30px 28px 30px;
+    margin: 0 auto;
+    margin-top: 30px;
+  }
+  #lobby {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 16px;
+  }
+  #lobby input, #lobby select {
+    padding: 14px 18px;
+    border-radius: 8px;
+    border: 1.6px solid #01818a;
+    background: #e8fdff;
+    margin-bottom: 0;
+    font-size: 1.15rem;
+    width: 230px;
+    margin: 8px 0;
+  }
+  #lobby button {
+    padding: 12px 22px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(90deg, #067cc2 45%, #3edc97 100%);
+    color: #fff;
+    font-size: 1.07em;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(30,100,110,0.09);
+    transition: background 0.22s;
+  }
+  #lobby button:hover {
+    background: linear-gradient(90deg, #01818a 45%, #67ffd7 100%);
+    color: #333;
+  }
+  .game-content {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    justify-content: stretch;
+    align-items: flex-start;
+    min-height: 520px;
+  }
+  .sidebar {
+    background-color: #f3faff;
+    border: 2.1px solid #93d5e3;
+    overflow-y: auto;
+    max-height: 72vh;
+    padding: 22px 18px 14px 18px;
+    box-sizing: border-box;
+    min-width: 240px;
+    width: 320px;
+    border-radius: 12px;
+    margin: 10px 0;
+  }
+  .sidebar.leaderboard {
+    border-right: 2.3px solid #72c7df;
+    border-left: none;
+    box-shadow: 3px 1.5px 14px #bfdbf5a6;
+  }
+  .sidebar.history {
+    border-left: 2.3px solid #72c7df;
+    border-right: none;
+    box-shadow: -3px 1.5px 14px #bfdbf5a6;
+  }
+  .main-game {
+    flex-grow: 1;
+    padding: 0 38px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 360px;
+  }
+  #countryImage {
+    display: block;
+    width: 480px;
+    max-width: 98vw;
+    max-height: 320px;
+    object-fit: cover;
+    margin-top: 32px;
+    margin-bottom: 22px;
+    border-radius: 18px;
+    box-shadow: 0 8px 18px rgba(0,82,154,0.11);
+    border: 3px solid #3edc97;
+    background: #ccf2e8;
+  }
+  #history, #playersList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column-reverse;
+    max-height: 320px;
+    overflow-y: auto;
+    font-size: 1.1rem;
+    color: #045d7a;
+  }
+  #history li, #playersList li {
+    padding: 8px 0;
+    border-bottom: 1px solid #d5f6e5;
+    font-size: 1.07rem;
+  }
+  .sidebar h3 {
+    font-size: 1.3rem;
+    margin-bottom: 14px;
+    color: #237472;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .buttons {
+    margin-top: 22px;
+    display: flex;
+    gap: 16px;
+  }
+  .giveup, #startGameBtn, .play-again-btn {
+    background: linear-gradient(90deg, #ee1d23 40%, #f49787 100%);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 1.08em;
+    box-shadow: 0 3px 14px rgba(200,50,60,0.055);
+    cursor: pointer;
+    margin-top: 17px;
+    transition: background 0.19s;
+  }
+  .giveup:hover {
+    background: #93242c;
+    color: #ffe;
+  }
+  
+  .submit-btn {
+    background: linear-gradient(90deg, #068832 40%, #f49787 100%);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 1.08em;
+    box-shadow: 0 3px 14px rgba(200,50,60,0.055);
+    cursor: pointer;
+    margin-top: 17px;
+    transition: background 0.19s;
+  }
+  .submit-btn:hover {
+    background: #076625;
+    color: #ffe;
+  }
+  #message {
+    margin-top: 18px;
+    min-height: 32px;
+    color: #1976d2;
+    background: #e4ecfb;
+    padding: 10px 28px;
+    border-radius: 10px;
+    font-size: 1.06em;
+    box-shadow: 0 2px 12px #d6ecffd9;
+  }
+  #roomTitle {
+    margin-bottom: 0;
+    font-size: 1.30em;
+    font-weight: 650;
+    color: #157366;
+    letter-spacing: 1.5px;
+  }
+  #turnInfo {
+    margin-bottom: 10px;
+    font-size: 1.14em;
+    color: #3d4a7a;
+    font-weight: 540;
+  }
+  .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.33);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    display: none;
+  }
+  .modal-content {
+    background-color: white;
+    padding: 28px 38px;
+    border-radius: 14px;
+    text-align: center;
+    min-width: 350px;
+  }
+  .winner-message {
+    font-size: 2em;
+    margin-bottom: 24px;
+    color: #1976d2;
+    font-weight: 900;
+  }
+  .play-again-btn {
+    padding: 13px 26px;
+    border-radius: 9px;
+    background: linear-gradient(90deg,#43a047 50%,#8ff797 100%);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    margin-top: 13px;
+    cursor: pointer;
+    font-size: 1.12rem;
+    box-shadow: 0 6px 18px rgba(17,191,67,0.13);
+  }
+
+  @media (max-width: 1120px) {
+    .sidebar {
+      min-width: 150px;
+      width: 27vw;
+      font-size: 1em;
+      padding: 13px 10px 8px 10px;
     }
     .main-game {
-      flex-grow: 1;
-      padding-right: 20px;
+      padding: 6px;
+      min-width: 0;
+    }
+    .card { padding: 18px 6px 12px 6px; }
+  }
+  @media (max-width: 900px) {
+    .game-content {
+      flex-direction: column;
+      gap: 18px;
     }
     .sidebar {
-      width: 300px;
-      background-color: #fff;
-      border-left: 1px solid #ccc;
-      overflow-y: auto;
-      max-height: 80vh;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-    #history, #playersList {
-      list-style: none;
-      padding: 0;
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      border-right: none;
+      border-left: none;
+      border-top: 2px solid #029f92;
+      box-shadow: none;
       margin: 0;
-      display: flex;
-      flex-direction: column-reverse;
     }
-    #history li, #playersList li {
-      padding: 5px 0;
-      border-bottom: 1px solid #eee;
+    .main-game {
+      padding: 0;
     }
     #countryImage {
-      display: none;
-      width: 100%;
-      max-height: 300px;
-      object-fit: cover;
-      margin-top: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 98vw;
+      min-height: 180px;
+      max-width: 99vw;
     }
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .game-content {
-        flex-direction: column;
-      }
-      .sidebar {
-        width: 100%;
-        max-height: 200px;
-        margin-top: 20px;
-      }
-      .main-game {
-        padding-right: 0;
-      }
-      #countryImage {
-        display: block; /* Show image on mobile */
-      }
-    }
-    /* Modal Styles (for loading/error states) */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      display: none;
-    }
-    .modal-content {
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-    }
-  </style>
+  }
+</style>
+
 </head>
 <body>
   <div class="container">
@@ -136,35 +323,45 @@
     <!-- Game Area -->
     <div id="game" class="card" style="display:none;">
       <div class="game-content">
+        <!-- Leaderboard Left Sidebar -->
+        <div class="sidebar leaderboard">
+          <h3>Leaderboard</h3>
+          <ul id="playersList"></ul>
+        </div>
+        <!-- Main Center Area: Input + Image -->
         <div class="main-game">
           <h2 id="roomTitle">Room: </h2>
           <p id="turnInfo" aria-live="polite"></p>
           <button id="startGameBtn" style="display:none;" onclick="startGame()" aria-label="Start the game">Start Game</button>
           <input id="countryInput" placeholder="Enter Place Name" style="display:none;" aria-label="Place name input">
           <div class="buttons" style="display:none;">
-            <button onclick="submitCountry()" aria-label="Submit place name">Submit</button>
+            <button onclick="submitCountry()" class="submit-btn" aria-label="Submit place name">Submit</button>
+
             <button onclick="giveUp()" class="giveup" aria-label="Give up turn">Give Up</button>
           </div>
           <p id="message" class="message" aria-live="assertive"></p>
+          <img id="countryImage" alt="Image of the submitted place">
           <button onclick="leaveRoom()" class="giveup">Leave Room</button>
         </div>
-        <div class="sidebar">
-          <h3>Leaderboard</h3>
-          <ul id="playersList"></ul>
+        <!-- History Right Sidebar -->
+        <div class="sidebar history">
           <h3>History</h3>
           <ul id="history"></ul>
         </div>
       </div>
-      <img id="countryImage" alt="Image of the submitted place">
     </div>
 
     <!-- Winner Modal -->
-    <div id="winnerModal" class="modal" style="display: none;">
-      <div class="modal-content">
-        <h2 id="winnerName" class="winner-message" aria-live="assertive"></h2>
-        <button onclick="playAgain()" class="play-again-btn" aria-label="Play again">Play Again</button>
-      </div>
-    </div>
+<!-- Winner Modal -->
+<div id="winnerModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <!-- WIN ANIMATION CONTAINER -->
+    <div id="win-animation" style="margin-bottom: 16px;"></div>
+    <h2 id="winnerName" class="winner-message" aria-live="assertive"></h2>
+    <button onclick="playAgain()" class="play-again-btn" aria-label="Play again">Play Again</button>
+  </div>
+</div>
+
 
     <!-- Loading/Error Modal -->
     <div id="imageModal" class="modal">
@@ -176,7 +373,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    // Ensure modals are hidden on page load
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("winnerModal").style.display = "none";
       document.getElementById("imageModal").style.display = "none";
