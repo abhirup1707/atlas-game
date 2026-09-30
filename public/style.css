@@ -61,24 +61,70 @@ body {
   display: flex;
   flex-direction: column;
   background: 
-    radial-gradient(ellipse at 15% 15%, rgba(14, 165, 233, 0.12) 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 20%, rgba(139, 92, 246, 0.10) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 85%, rgba(16, 185, 129, 0.10) 0%, transparent 50%),
-    linear-gradient(180deg, #070c18 0%, #0d1527 100%);
+    radial-gradient(ellipse at 15% 15%, rgba(14, 165, 233, 0.14) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+    linear-gradient(180deg, #050914 0%, #0a1122 50%, #0d162c 100%);
   background-attachment: fixed;
 }
 
-/* Background Atmosphere Grid */
+/* Dynamic Geographic Topographic Canvas Background */
+#atlasBgCanvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.9;
+}
+
+/* Background Atmosphere Coordinate Grid */
 .bg-grid {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 36px 36px;
+    linear-gradient(to right, rgba(56, 189, 248, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(56, 189, 248, 0.025) 1px, transparent 1px);
+  background-size: 42px 42px;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
+}
+
+/* Cartographic Datum Watermarks */
+.bg-coordinates-top {
+  position: fixed;
+  top: 68px;
+  right: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(56, 189, 248, 0.35);
+  letter-spacing: 2px;
+  pointer-events: none;
+  z-index: 1;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+.bg-coordinates-bottom {
+  position: fixed;
+  bottom: 12px;
+  left: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(16, 185, 129, 0.3);
+  letter-spacing: 2px;
+  pointer-events: none;
+  z-index: 1;
+  text-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+@media (max-width: 768px) {
+  .bg-coordinates-top,
+  .bg-coordinates-bottom {
+    display: none;
+  }
 }
 
 /* Top App Header */
@@ -1602,7 +1648,15 @@ input::placeholder {
   z-index: 1001;
 }
 
-/* Responsive */
+/* ==========================================================================
+   MOBILE & RESPONSIVE EXPEDITION UI SYSTEM
+   ========================================================================== */
+
+/* Mobile Segmented View Tabs (Desktop: Hidden) */
+.mobile-nav-bar {
+  display: none;
+}
+
 @media (max-width: 1180px) {
   .game-content {
     grid-template-columns: 260px 1fr 270px;
@@ -1610,13 +1664,274 @@ input::placeholder {
   }
 }
 
+/* Tablet & Mobile Screens */
 @media (max-width: 960px) {
-  header { padding: 10px 16px; }
-  .container { padding: 12px; }
+  header {
+    padding: 10px 14px;
+  }
+  
+  .brand-logo {
+    font-size: 1.6rem;
+  }
+  
+  .brand-title h1 {
+    font-size: 1.35rem;
+    letter-spacing: 1.5px;
+  }
+
+  .brand-tagline {
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+  }
+
+  .container {
+    padding: 10px 8px;
+    max-width: 100%;
+  }
+
+  .game-hud {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  /* Mobile Navigation Segmented Tabs */
+  .mobile-nav-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-bottom: 12px;
+    background: rgba(13, 22, 42, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  .mobile-nav-btn {
+    padding: 9px 2px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .mobile-nav-btn.active {
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.45) 0%, rgba(14, 165, 233, 0.3) 100%);
+    color: #fff;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    box-shadow: 0 2px 10px rgba(56, 189, 248, 0.25);
+  }
+
+  /* Flex Layout on Mobile with Segmented Visibility */
   .game-content {
-    grid-template-columns: 1fr;
     display: flex;
     flex-direction: column;
+    gap: 12px;
   }
-  .sidebar-col { width: 100%; }
+
+  .sidebar-col {
+    width: 100%;
+  }
+
+  /* View Filter: Arena (Play field) */
+  .game-content.mobile-view-arena .main-game {
+    display: flex !important;
+    order: 1;
+  }
+  .game-content.mobile-view-arena .left-col {
+    display: none !important;
+  }
+  .game-content.mobile-view-arena .right-col {
+    display: none !important;
+  }
+
+  /* View Filter: 3D Globe */
+  .game-content.mobile-view-globe .left-col {
+    display: flex !important;
+    order: 1;
+  }
+  .game-content.mobile-view-globe .left-col .leaderboard {
+    display: none !important;
+  }
+  .game-content.mobile-view-globe .left-col .globe-card {
+    display: flex !important;
+  }
+  .game-content.mobile-view-globe .globe-container {
+    height: 300px !important;
+    touch-action: none;
+  }
+  .game-content.mobile-view-globe .main-game {
+    display: none !important;
+  }
+  .game-content.mobile-view-globe .right-col {
+    display: none !important;
+  }
+
+  /* View Filter: Location Spotlight & Intel */
+  .game-content.mobile-view-intel .right-col {
+    display: flex !important;
+    order: 1;
+  }
+  .game-content.mobile-view-intel .main-game {
+    display: none !important;
+  }
+  .game-content.mobile-view-intel .left-col {
+    display: none !important;
+  }
+
+  /* View Filter: Ranks & Leaderboard */
+  .game-content.mobile-view-ranks .left-col {
+    display: flex !important;
+    order: 1;
+  }
+  .game-content.mobile-view-ranks .left-col .globe-card {
+    display: none !important;
+  }
+  .game-content.mobile-view-ranks .left-col .leaderboard {
+    display: flex !important;
+  }
+  .game-content.mobile-view-ranks .main-game {
+    display: none !important;
+  }
+  .game-content.mobile-view-ranks .right-col {
+    display: none !important;
+  }
+
+  /* Turn Status Card Compact Spacing */
+  .turn-status-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .target-letter-showcase {
+    gap: 12px;
+  }
+
+  .target-letter-tile {
+    width: 60px;
+    height: 60px;
+    font-size: 2.3rem;
+  }
+
+  .target-instruction {
+    font-size: 1.15rem;
+  }
+
+  /* Touch-Optimized Input Controls */
+  #countryInput {
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
+    padding: 12px 14px;
+    min-height: 48px;
+  }
+
+  .submit-btn {
+    padding: 12px 20px;
+    min-height: 48px;
+  }
+
+  .giveup {
+    padding: 12px 16px;
+    min-height: 48px;
+  }
+}
+
+/* Small Smartphone Screen Polish (<= 540px) */
+@media (max-width: 540px) {
+  header {
+    padding: 8px 10px;
+  }
+
+  .header-controls {
+    gap: 6px;
+  }
+
+  .icon-btn {
+    padding: 5px 8px;
+    font-size: 0.78rem;
+  }
+
+  .game-hud {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .hud-left {
+    justify-content: space-between;
+  }
+
+  .hud-right {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn-leave {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Mobile Input Layout: Stack buttons underneath input for maximum thumb reach */
+  .input-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .buttons {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .submit-btn {
+    flex: 2;
+    justify-content: center;
+  }
+
+  .giveup {
+    flex: 1;
+    text-align: center;
+  }
+
+  /* Lobby Card Tweaks */
+  .avatar-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+
+  .avatar-pill {
+    width: 44px;
+    height: 44px;
+    font-size: 1.35rem;
+  }
+
+  .mode-switcher {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .round-pills {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .room-invite-box {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .invite-code {
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+  }
 }

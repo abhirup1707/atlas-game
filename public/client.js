@@ -553,6 +553,7 @@ function startSoloTurn(isPlayerTurn, lastLetter) {
     inputField.style.display = "block";
     inputField.value = "";
     inputField.focus();
+    switchMobileView('arena');
 
     const playCard = document.getElementById("activePlayCard");
     if (playCard) playCard.classList.add("is-your-turn");
@@ -1373,6 +1374,7 @@ function initializeUI() {
     inputField.focus();
 
     sound.playTurn();
+    switchMobileView('arena');
 
     const playCard = document.getElementById("activePlayCard");
     if (playCard) playCard.classList.add("is-your-turn");
@@ -1529,3 +1531,21 @@ function initializeUI() {
     if (countdownInterval) clearInterval(countdownInterval);
   });
 }
+
+// Mobile View Tab Switcher for Smartphone Ergonomics
+function switchMobileView(viewName) {
+  const content = document.querySelector('.game-content');
+  if (!content) return;
+
+  content.classList.remove('mobile-view-arena', 'mobile-view-globe', 'mobile-view-intel', 'mobile-view-ranks');
+  content.classList.add(`mobile-view-${viewName}`);
+
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.getElementById(`tabBtn${viewName.charAt(0).toUpperCase() + viewName.slice(1)}`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  if (viewName === 'globe' && typeof atlasGlobeInstance !== 'undefined' && atlasGlobeInstance) {
+    setTimeout(() => atlasGlobeInstance.resize(), 80);
+  }
+}
+window.switchMobileView = switchMobileView;

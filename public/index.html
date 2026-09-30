@@ -8,7 +8,10 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <canvas id="atlasBgCanvas"></canvas>
   <div class="bg-grid"></div>
+  <div class="bg-coordinates-top">LAT 28°36'N // LON 77°12'E • WGS-84 GEODETIC GRID</div>
+  <div class="bg-coordinates-bottom">CARTOGRAPHIC PROJECTION • ATLAS EXPEDITION v2.0</div>
   <canvas id="confettiCanvas"></canvas>
 
   <!-- Top App Header -->
@@ -211,8 +214,24 @@
         </div>
       </div>
 
+      <!-- Mobile Segmented Navigation Bar (Optimized for Phones & Tablets) -->
+      <div class="mobile-nav-bar" id="mobileNavBar">
+        <button class="mobile-nav-btn active" id="tabBtnArena" onclick="switchMobileView('arena')">
+          <span>🎯 Arena</span>
+        </button>
+        <button class="mobile-nav-btn" id="tabBtnGlobe" onclick="switchMobileView('globe')">
+          <span>🌍 3D Globe</span>
+        </button>
+        <button class="mobile-nav-btn" id="tabBtnIntel" onclick="switchMobileView('intel')">
+          <span>📸 Spotlight</span>
+        </button>
+        <button class="mobile-nav-btn" id="tabBtnRanks" onclick="switchMobileView('ranks')">
+          <span>🏆 Ranks</span>
+        </button>
+      </div>
+
       <!-- 3-Column Content Layout -->
-      <div class="game-content">
+      <div class="game-content mobile-view-arena">
         <!-- LEFT COLUMN: Leaderboard + 3D Interactive Globe -->
         <aside class="sidebar-col left-col">
           <div class="sidebar leaderboard">
@@ -461,6 +480,7 @@
   <script src="three.min.js"></script>
   <script src="geo-data.js"></script>
   <script src="globe.js"></script>
+  <script src="atlas-bg.js"></script>
   <script src="client.js"></script>
 </body>
 </html>
