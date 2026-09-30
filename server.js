@@ -235,14 +235,15 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leaveRoom", (roomId) => {
-    if (!rooms[roomId]) return;
-    const playerIndex = rooms[roomId].players.findIndex(p => p.socketId === socket.id);
+    const room = rooms[roomId];
+    if (!room) return;
+    const playerIndex = room.players.findIndex(p => p.socketId === socket.id);
     if (playerIndex !== -1) {
-      rooms[roomId].players.splice(playerIndex, 1);
-      io.to(roomId).emit("updatePlayers", rooms[roomId].players);
+      room.players.splice(playerIndex, 1);
+      io.to(roomId).emit("updatePlayers", room.players);
       socket.leave(roomId);
       if (room.players.length === 0) {
-        if (rooms[roomId].turnTimeouts[roomId]) clearTimeout(rooms[roomId].turnTimeouts[roomId]);
+        if (room.turnTimeouts[roomId]) clearTimeout(room.turnTimeouts[roomId]);
         delete rooms[roomId];
       } else {
         checkGameOver(roomId);

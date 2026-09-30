@@ -3,381 +3,464 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌍 Atlas Multiplayer Game</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(120deg, #e4ecfb 0%, #c7ffd8 100%);
-    height: 100vh;
-  }
-  .container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    min-height: 100vh;
-  }
-  header {
-    background: #fff;
-    padding: 28px 0 18px 0;
-    box-shadow: 0 6px 22px rgba(60, 60, 110, 0.06);
-    text-align: center;
-  }
-  header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #26315f;
-    letter-spacing: 1px;
-  }
-  .card {
-    background: #fff;
-    box-shadow: 0 8px 32px rgba(60,60,120,0.10), 0 1.5px 4px rgba(100,100,140,0.08);
-    border-radius: 18px;
-    width: 97%;
-    max-width: 1420px;
-    padding: 36px 30px 28px 30px;
-    margin: 0 auto;
-    margin-top: 30px;
-  }
-  #lobby {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 16px;
-  }
-  #lobby input, #lobby select {
-    padding: 14px 18px;
-    border-radius: 8px;
-    border: 1.6px solid #01818a;
-    background: #e8fdff;
-    margin-bottom: 0;
-    font-size: 1.15rem;
-    width: 230px;
-    margin: 8px 0;
-  }
-  #lobby button {
-    padding: 12px 22px;
-    border-radius: 8px;
-    border: none;
-    background: linear-gradient(90deg, #067cc2 45%, #3edc97 100%);
-    color: #fff;
-    font-size: 1.07em;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(30,100,110,0.09);
-    transition: background 0.22s;
-  }
-  #lobby button:hover {
-    background: linear-gradient(90deg, #01818a 45%, #67ffd7 100%);
-    color: #333;
-  }
-  .game-content {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    height: 100%;
-    justify-content: stretch;
-    align-items: flex-start;
-    min-height: 520px;
-  }
-  .sidebar {
-    background-color: #f3faff;
-    border: 2.1px solid #93d5e3;
-    overflow-y: auto;
-    max-height: 72vh;
-    padding: 22px 18px 14px 18px;
-    box-sizing: border-box;
-    min-width: 240px;
-    width: 320px;
-    border-radius: 12px;
-    margin: 10px 0;
-  }
-  .sidebar.leaderboard {
-    border-right: 2.3px solid #72c7df;
-    border-left: none;
-    box-shadow: 3px 1.5px 14px #bfdbf5a6;
-  }
-  .sidebar.history {
-    border-left: 2.3px solid #72c7df;
-    border-right: none;
-    box-shadow: -3px 1.5px 14px #bfdbf5a6;
-  }
-  .main-game {
-    flex-grow: 1;
-    padding: 0 38px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-width: 360px;
-  }
-  #countryImage {
-    display: block;
-    width: 480px;
-    max-width: 98vw;
-    max-height: 320px;
-    object-fit: cover;
-    margin-top: 32px;
-    margin-bottom: 22px;
-    border-radius: 18px;
-    box-shadow: 0 8px 18px rgba(0,82,154,0.11);
-    border: 3px solid #3edc97;
-    background: #ccf2e8;
-  }
-  #history, #playersList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column-reverse;
-    max-height: 320px;
-    overflow-y: auto;
-    font-size: 1.1rem;
-    color: #045d7a;
-  }
-  #history li, #playersList li {
-    padding: 8px 0;
-    border-bottom: 1px solid #d5f6e5;
-    font-size: 1.07rem;
-  }
-  .sidebar h3 {
-    font-size: 1.3rem;
-    margin-bottom: 14px;
-    color: #237472;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-  .buttons {
-    margin-top: 22px;
-    display: flex;
-    gap: 16px;
-  }
-  .giveup, #startGameBtn, .play-again-btn {
-    background: linear-gradient(90deg, #ee1d23 40%, #f49787 100%);
-    color: #fff;
-    font-weight: 700;
-    border: none;
-    padding: 12px 22px;
-    border-radius: 8px;
-    font-size: 1.08em;
-    box-shadow: 0 3px 14px rgba(200,50,60,0.055);
-    cursor: pointer;
-    margin-top: 17px;
-    transition: background 0.19s;
-  }
-  .giveup:hover {
-    background: #93242c;
-    color: #ffe;
-  }
-  
-  .submit-btn {
-    background: linear-gradient(90deg, #068832 40%, #f49787 100%);
-    color: #fff;
-    font-weight: 700;
-    border: none;
-    padding: 12px 22px;
-    border-radius: 8px;
-    font-size: 1.08em;
-    box-shadow: 0 3px 14px rgba(200,50,60,0.055);
-    cursor: pointer;
-    margin-top: 17px;
-    transition: background 0.19s;
-  }
-  .submit-btn:hover {
-    background: #076625;
-    color: #ffe;
-  }
-  #message {
-    margin-top: 18px;
-    min-height: 32px;
-    color: #1976d2;
-    background: #e4ecfb;
-    padding: 10px 28px;
-    border-radius: 10px;
-    font-size: 1.06em;
-    box-shadow: 0 2px 12px #d6ecffd9;
-  }
-  #roomTitle {
-    margin-bottom: 0;
-    font-size: 1.30em;
-    font-weight: 650;
-    color: #157366;
-    letter-spacing: 1.5px;
-  }
-  #turnInfo {
-    margin-bottom: 10px;
-    font-size: 1.14em;
-    color: #3d4a7a;
-    font-weight: 540;
-  }
-  .modal {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.33);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    display: none;
-  }
-  .modal-content {
-    background-color: white;
-    padding: 28px 38px;
-    border-radius: 14px;
-    text-align: center;
-    min-width: 350px;
-  }
-  .winner-message {
-    font-size: 2em;
-    margin-bottom: 24px;
-    color: #1976d2;
-    font-weight: 900;
-  }
-  .play-again-btn {
-    padding: 13px 26px;
-    border-radius: 9px;
-    background: linear-gradient(90deg,#43a047 50%,#8ff797 100%);
-    color: #fff;
-    border: none;
-    font-weight: 700;
-    margin-top: 13px;
-    cursor: pointer;
-    font-size: 1.12rem;
-    box-shadow: 0 6px 18px rgba(17,191,67,0.13);
-  }
-
-  @media (max-width: 1120px) {
-    .sidebar {
-      min-width: 150px;
-      width: 27vw;
-      font-size: 1em;
-      padding: 13px 10px 8px 10px;
-    }
-    .main-game {
-      padding: 6px;
-      min-width: 0;
-    }
-    .card { padding: 18px 6px 12px 6px; }
-  }
-  @media (max-width: 900px) {
-    .game-content {
-      flex-direction: column;
-      gap: 18px;
-    }
-    .sidebar {
-      width: 100%;
-      max-width: none;
-      min-width: 0;
-      border-right: none;
-      border-left: none;
-      border-top: 2px solid #029f92;
-      box-shadow: none;
-      margin: 0;
-    }
-    .main-game {
-      padding: 0;
-    }
-    #countryImage {
-      width: 98vw;
-      min-height: 180px;
-      max-width: 99vw;
-    }
-  }
-</style>
-
+  <title>🌍 Atlas - Multiplayer &amp; Solo World Chain Game</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🌍 Atlas Multiplayer Game</h1>
-    </header>
+  <div class="bg-grid"></div>
+  <canvas id="confettiCanvas"></canvas>
 
-    <!-- Lobby -->
-    <div id="lobby" class="card">
-      <input id="playerName" placeholder="Enter Your Name" aria-label="Player name" required>
-      <select id="roundsSelect" aria-label="Number of rounds">
-        <option value="1">1 Round</option>
-        <option value="2">2 Rounds</option>
-        <option value="3">3 Rounds</option>
-        <option value="4">4 Rounds</option>
-        <option value="5">5 Rounds</option>
-        <option value="6">6 Rounds</option>
-        <option value="7">7 Rounds</option>
-        <option value="8">8 Rounds</option>
-        <option value="9">9 Rounds</option>
-        <option value="10">10 Rounds</option>
-        <option value="11">11 Rounds</option>
-        <option value="12">12 Rounds</option>
-        <option value="13">13 Rounds</option>
-        <option value="14">14 Rounds</option>
-        <option value="15">15 Rounds</option>
-      </select>
-      <button id="createRoomBtn" onclick="createRoom()">Create Room</button>
-      <input id="roomIdInput" placeholder="Room ID (if joining)" aria-label="Room ID">
-      <button id="joinRoomBtn" onclick="joinRoom()">Join Room</button>
+  <!-- Top App Header -->
+  <header>
+    <div class="brand-wrapper">
+      <span class="brand-logo">🧭</span>
+      <div class="brand-title">
+        <h1>ATLAS</h1>
+        <div class="brand-tagline">World Geography Expedition</div>
+      </div>
     </div>
+    
+    <div class="header-controls">
+      <div class="badge-status">
+        <span class="status-dot"></span>
+        <span id="connectionStatus">Online</span>
+      </div>
+      <button class="icon-btn" id="audioToggleBtn" title="Toggle Sound Effects" onclick="toggleAudio()">
+        <span id="audioIcon">🔊</span>
+      </button>
+      <button class="icon-btn" onclick="openRulesModal()" title="How to Play">
+        <span>📖 Rules</span>
+      </button>
+    </div>
+  </header>
 
-    <!-- Game Area -->
-    <div id="game" class="card" style="display:none;">
-      <div class="game-content">
-        <!-- Leaderboard Left Sidebar -->
-        <div class="sidebar leaderboard">
-          <h3>Leaderboard</h3>
-          <ul id="playersList"></ul>
+  <!-- Main Container -->
+  <main class="container">
+    <!-- Lobby Card -->
+    <div id="lobby" class="card">
+      <div class="lobby-header">
+        <div class="lobby-badge">Expedition Terminal</div>
+        <h2>Ready to Explore the World?</h2>
+        <p>Chain cities, countries, and natural wonders in real-time!</p>
+      </div>
+
+      <!-- Mode Switcher: Multiplayer vs Solo vs AI -->
+      <div class="mode-switcher">
+        <button class="mode-btn active" id="modeMultiBtn" onclick="switchGameMode('multi')">
+          <span>👥 Multiplayer Match</span>
+        </button>
+        <button class="mode-btn" id="modeSoloBtn" onclick="switchGameMode('solo')">
+          <span>🤖 Solo vs AI Bot</span>
+        </button>
+      </div>
+
+      <!-- Avatar Selector -->
+      <div class="form-group" style="margin-bottom: 18px;">
+        <label>Choose Explorer Avatar</label>
+        <div class="round-pills" id="avatarPicker" style="grid-template-columns: repeat(8, 1fr);">
+          <div class="round-pill active" onclick="selectAvatar('🌍', this)">🌍</div>
+          <div class="round-pill" onclick="selectAvatar('🧭', this)">🧭</div>
+          <div class="round-pill" onclick="selectAvatar('✈️', this)">✈️</div>
+          <div class="round-pill" onclick="selectAvatar('🎒', this)">🎒</div>
+          <div class="round-pill" onclick="selectAvatar('⛵', this)">⛵</div>
+          <div class="round-pill" onclick="selectAvatar('⛰️', this)">⛰️</div>
+          <div class="round-pill" onclick="selectAvatar('🏝️', this)">🏝️</div>
+          <div class="round-pill" onclick="selectAvatar('🚀', this)">🚀</div>
         </div>
-        <!-- Main Center Area: Input + Image -->
-        <div class="main-game">
-          <h2 id="roomTitle">Room: </h2>
-          <p id="turnInfo" aria-live="polite"></p>
-          <button id="startGameBtn" style="display:none;" onclick="startGame()" aria-label="Start the game">Start Game</button>
-          <input id="countryInput" placeholder="Enter Place Name" style="display:none;" aria-label="Place name input">
-          <div class="buttons" style="display:none;">
-            <button onclick="submitCountry()" class="submit-btn" aria-label="Submit place name">Submit</button>
+      </div>
 
-            <button onclick="giveUp()" class="giveup" aria-label="Give up turn">Give Up</button>
+      <!-- MULTIPLAYER MODE CONTROLS -->
+      <div id="multiplayerSection">
+        <div class="lobby-tabs">
+          <button class="tab-btn active" id="tabCreateBtn" onclick="switchLobbyTab('create')">
+            <span>✨ Create Room</span>
+          </button>
+          <button class="tab-btn" id="tabJoinBtn" onclick="switchLobbyTab('join')">
+            <span>🔑 Join Room</span>
+          </button>
+        </div>
+
+        <!-- Create Room Tab Content -->
+        <div id="createTabContent" class="form-section">
+          <div class="form-group">
+            <label for="playerName">Your Explorer Name</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input id="playerName" placeholder="e.g. Marco Polo" aria-label="Player name" required autocomplete="off">
+            </div>
           </div>
-          <p id="message" class="message" aria-live="assertive"></p>
-          <img id="countryImage" alt="Image of the submitted place">
-          <button onclick="leaveRoom()" class="giveup">Leave Room</button>
+
+          <div class="form-group">
+            <label for="roundsSelect">Number of Rounds</label>
+            <div class="round-pills" id="roundPills">
+              <div class="round-pill" onclick="selectQuickRounds(1, this)">1 Round</div>
+              <div class="round-pill active" onclick="selectQuickRounds(3, this)">3 Rounds</div>
+              <div class="round-pill" onclick="selectQuickRounds(5, this)">5 Rounds</div>
+              <div class="round-pill" onclick="selectQuickRounds(10, this)">10 Rounds</div>
+            </div>
+            <select id="roundsSelect" aria-label="Number of rounds" style="display: none;">
+              <option value="1">1 Round</option>
+              <option value="2">2 Rounds</option>
+              <option value="3" selected>3 Rounds</option>
+              <option value="4">4 Rounds</option>
+              <option value="5">5 Rounds</option>
+              <option value="6">6 Rounds</option>
+              <option value="7">7 Rounds</option>
+              <option value="8">8 Rounds</option>
+              <option value="9">9 Rounds</option>
+              <option value="10">10 Rounds</option>
+              <option value="11">11 Rounds</option>
+              <option value="12">12 Rounds</option>
+              <option value="13">13 Rounds</option>
+              <option value="14">14 Rounds</option>
+              <option value="15">15 Rounds</option>
+            </select>
+          </div>
+
+          <button id="createRoomBtn" class="btn-primary" onclick="createRoom()">
+            <span>🚀 Launch Multiplayer Room</span>
+          </button>
         </div>
-        <!-- History Right Sidebar -->
-        <div class="sidebar history">
-          <h3>History</h3>
-          <ul id="history"></ul>
+
+        <!-- Join Room Tab Content -->
+        <div id="joinTabContent" class="form-section" style="display: none;">
+          <div class="form-group">
+            <label for="joinPlayerName">Your Explorer Name</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input id="joinPlayerName" placeholder="e.g. Amelia Earhart" aria-label="Player name" autocomplete="off" oninput="syncJoinName(this.value)">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="roomIdInput">Room Code (6 Characters)</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔑</span>
+              <input id="roomIdInput" placeholder="ABCXYZ" aria-label="Room ID" maxlength="8" autocomplete="off">
+            </div>
+          </div>
+
+          <button id="joinRoomBtn" class="btn-primary" onclick="joinRoom()">
+            <span>🗺️ Enter Expedition</span>
+          </button>
         </div>
+      </div>
+
+      <!-- SOLO VS AI BOT MODE CONTROLS -->
+      <div id="soloSection" class="form-section" style="display: none;">
+        <div class="form-group">
+          <label for="soloPlayerName">Your Explorer Name</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input id="soloPlayerName" placeholder="e.g. Ferdinand Magellan" autocomplete="off" oninput="syncSoloName(this.value)">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Select AI Opponent &amp; Difficulty</label>
+          <div class="round-pills" id="botDifficultyPills" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="round-pill" onclick="selectBotDifficulty('easy', this)">
+              <div>🟢 Marco Polo</div>
+              <div style="font-size: 0.72rem; color: var(--text-dim);">Novice (8s)</div>
+            </div>
+            <div class="round-pill active" onclick="selectBotDifficulty('medium', this)">
+              <div>🟡 Ibn Battuta</div>
+              <div style="font-size: 0.72rem; color: var(--text-dim);">Voyager (5s)</div>
+            </div>
+            <div class="round-pill" onclick="selectBotDifficulty('hard', this)">
+              <div>🔴 Magellan</div>
+              <div style="font-size: 0.72rem; color: var(--text-dim);">Master (3s)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Expedition Length</label>
+          <div class="round-pills" id="soloRoundPills">
+            <div class="round-pill" onclick="selectSoloRounds(1, this)">1 Round</div>
+            <div class="round-pill active" onclick="selectSoloRounds(3, this)">3 Rounds</div>
+            <div class="round-pill" onclick="selectSoloRounds(5, this)">5 Rounds</div>
+          </div>
+        </div>
+
+        <button class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);" onclick="startSoloGame()">
+          <span>🤖 Start Solo Expedition</span>
+        </button>
       </div>
     </div>
 
-    <!-- Winner Modal -->
-<!-- Winner Modal -->
-<div id="winnerModal" class="modal" style="display: none;">
-  <div class="modal-content">
-    <!-- WIN ANIMATION CONTAINER -->
-    <div id="win-animation" style="margin-bottom: 16px;"></div>
-    <h2 id="winnerName" class="winner-message" aria-live="assertive"></h2>
-    <button onclick="playAgain()" class="play-again-btn" aria-label="Play again">Play Again</button>
-  </div>
-</div>
+    <!-- Game Area -->
+    <div id="game" style="display: none;">
+      <!-- Top HUD Header -->
+      <div class="game-hud">
+        <div class="hud-left">
+          <div class="room-badge-group">
+            <span class="hud-label">Expedition</span>
+            <span id="roomCodeDisplay" class="hud-room-code">------</span>
+            <button class="btn-copy" id="btnCopyCode" onclick="copyRoomCode()" title="Copy room code">
+              <span id="copyIcon">📋</span> <span id="copyLabel">Copy Code</span>
+            </button>
+          </div>
+          <div id="roundBadge" class="round-indicator">
+            <span>🏆 Round <strong id="hudCurrentRound">1</strong></span>
+          </div>
+        </div>
+        <div class="hud-right">
+          <button onclick="leaveRoom()" class="btn-leave">🚪 Exit Game</button>
+        </div>
+      </div>
 
+      <!-- 3-Column Content Layout -->
+      <div class="game-content">
+        <!-- LEFT COLUMN: Leaderboard + 3D Interactive Globe -->
+        <aside class="sidebar-col left-col">
+          <div class="sidebar leaderboard">
+            <div class="sidebar-header">
+              <h3><span>🏆</span> Leaderboard</h3>
+              <span id="playerCountBadge" class="count-badge">0 Explorers</span>
+            </div>
+            <ul id="playersList"></ul>
+          </div>
 
-    <!-- Loading/Error Modal -->
+          <!-- 3D Mini Globe Docked in Left Column -->
+          <div class="globe-card" id="globeCard">
+            <div class="globe-header">
+              <div class="globe-title">
+                <span>🌍</span> <span>3D Earth Flight Path</span>
+              </div>
+              <span id="globeStatus" class="globe-status-badge">Live 3D</span>
+            </div>
+            
+            <!-- 3D Earth Canvas (Clean, 100% visible, no floating overlays) -->
+            <div class="globe-container" id="globeContainer"></div>
+
+            <!-- Dedicated Route Banner completely outside the globe canvas -->
+            <div id="globeFlightBanner" class="globe-flight-footer">
+              <span class="flight-route-icon">✈️</span>
+              <span id="globeFlightRouteText" class="flight-route-text">Ready for expedition</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- CENTER COLUMN: Main Game Arena (Focused, Compact, No Scroll) -->
+        <div class="main-game">
+          <!-- Waiting Room Card (Visible before Host clicks Start Game) -->
+          <div id="waitingRoomCard" class="waiting-card" style="display: none;">
+            <div class="waiting-title">Expedition Briefing Room</div>
+            <p style="color: var(--text-muted); max-width: 440px;">
+              Share your expedition code with friends. Once everyone has assembled, the leader can launch the expedition!
+            </p>
+            
+            <div class="room-invite-box">
+              <div>
+                <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Expedition Code</div>
+                <div id="inviteCodeBig" class="invite-code">------</div>
+              </div>
+              <button class="btn-copy" style="padding: 10px 18px; font-size: 0.95rem;" onclick="copyRoomCode()">
+                <span>📋 Copy</span>
+              </button>
+            </div>
+
+            <button id="startGameBtn" style="display: none;" onclick="startGame()" aria-label="Start the game">
+              <span>🚀 Launch Expedition</span>
+            </button>
+
+            <div id="guestWaitingNotice" class="guest-waiting-msg" style="display: none;">
+              <span>⏳ Waiting for expedition leader to start the game...</span>
+            </div>
+          </div>
+
+          <!-- Active Turn Status Card -->
+          <div id="activePlayCard" class="turn-status-card" style="display: none;">
+            <div class="turn-header">
+              <div id="turnBadge" class="turn-badge other-turn">
+                <span id="turnStatusDot" class="status-dot"></span>
+                <span id="turnStatusText">Waiting for turn...</span>
+              </div>
+              <div class="timer-clock" id="timerClock">20s</div>
+            </div>
+
+            <!-- Giant Target Letter Showcase -->
+            <div class="target-letter-showcase">
+              <div id="targetLetterTile" class="target-letter-tile">?</div>
+              <div class="target-letter-info">
+                <div class="target-label" id="targetLetterLabel">Required Starting Letter</div>
+                <div class="target-instruction" id="targetInstruction">Any Place to Start!</div>
+              </div>
+            </div>
+
+            <!-- Visual Progress Timer Bar -->
+            <div class="timer-container">
+              <div class="timer-labels">
+                <span class="timer-score-potential" id="scorePotentialText">⚡ Max Speed Bonus: 200 pts</span>
+                <span id="turnTimeLabel">20s remaining</span>
+              </div>
+              <div class="timer-track">
+                <div id="timerBar" class="timer-bar"></div>
+              </div>
+            </div>
+
+            <!-- Tactical Lifelines Action Bar -->
+            <div class="lifelines-bar">
+              <div style="display: flex; gap: 8px;">
+                <button id="hintBtn" class="lifeline-btn" onclick="useHintLifeline()" title="Get a geographic hint">
+                  <span>💡 Hint</span> <span id="hintCountBadge" style="font-size: 0.75rem; opacity: 0.8;">(1)</span>
+                </button>
+                <button id="passBtn" class="lifeline-btn" onclick="usePassTicket()" title="Pass turn without elimination penalty">
+                  <span>🎲 Pass Ticket</span> <span id="passCountBadge" style="font-size: 0.75rem; opacity: 0.8;">(1)</span>
+                </button>
+              </div>
+              <div id="streakBadge" class="streak-badge" style="display: none;">
+                <span>🔥 Streak: <strong id="streakMultiplier">2x</strong></span>
+              </div>
+            </div>
+
+            <!-- Legacy hook for original code compatibility -->
+            <h2 id="roomTitle" style="display: none;">Room: </h2>
+            <p id="turnInfo" style="display: none;" aria-live="polite"></p>
+
+            <!-- Input & Action Buttons -->
+            <div class="game-controls">
+              <div class="input-row">
+                <input id="countryInput" placeholder="Type a country, city, river, sea..." style="display: none;" aria-label="Place name input" autocomplete="off" autocorrect="off" spellcheck="false">
+                <div class="buttons" style="display: none;">
+                  <button onclick="submitCountry()" class="submit-btn" aria-label="Submit place name">
+                    <span>Submit</span> <span>↵</span>
+                  </button>
+                  <button onclick="giveUp()" class="giveup" aria-label="Give up turn">
+                    <span>Pass</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Real-time Typing Hint / Validation -->
+              <div id="inputHint" style="font-size: 0.85rem; color: var(--text-dim); padding-left: 4px; display: none;"></div>
+            </div>
+
+            <!-- Notification / Message Alert -->
+            <p id="message" class="message" aria-live="assertive"></p>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Location Spotlight (Compact Photo & Trivia) + History Chain -->
+        <aside class="sidebar-col right-col">
+          <!-- Compact Location Spotlight Image & Trivia Card -->
+          <div class="spotlight-card" id="spotlightCard">
+            <div class="spotlight-header">
+              <div class="spotlight-title">
+                <span id="spotlightFlag">📍</span> <span id="spotlightPlaceTitle">Location Spotlight</span>
+              </div>
+              <span id="spotlightCategory" class="history-category" style="display: none;">Geography</span>
+            </div>
+            <div class="image-container">
+              <div id="spotlightPlaceholder" class="spotlight-placeholder">
+                <div class="placeholder-globe">📸</div>
+                <div style="font-size: 0.84rem; font-weight: 600;">Location Photos</div>
+              </div>
+              <img id="countryImage" alt="Image of the submitted place">
+              <div id="spotlightBadge" class="spotlight-badge"></div>
+            </div>
+            <!-- Dynamic Geographic Trivia Box -->
+            <div id="spotlightTrivia" class="spotlight-trivia" style="display: none;">
+              <span class="trivia-icon">💡</span>
+              <span id="triviaText">Trivia will appear here as places are explored.</span>
+            </div>
+          </div>
+
+          <!-- History Chain List -->
+          <div class="sidebar history">
+            <div class="sidebar-header">
+              <h3><span>🗺️</span> Expedition Chain</h3>
+              <span id="chainCountBadge" class="count-badge">0 Places</span>
+            </div>
+            <ul id="history"></ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Winner Celebration Modal with Expedition Passport -->
+    <div id="winnerModal" class="modal">
+      <div class="modal-content">
+        <div class="trophy-icon">🏆</div>
+        <div id="win-animation" style="margin-bottom: 8px;"></div>
+        <h2 id="winnerName" class="winner-message" aria-live="assertive"></h2>
+        <div id="winnerSubtext" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 12px;"></div>
+
+        <!-- Expedition Passport Stamp Card -->
+        <div class="passport-card">
+          <div class="passport-header">
+            <span class="passport-stamp-title">🛂 Official Expedition Passport</span>
+            <span style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 700;">VERIFIED</span>
+          </div>
+          <div class="passport-stats-grid">
+            <div class="passport-stat-box">
+              <div class="stat-box-val" id="passportDistance">0 km</div>
+              <div class="stat-box-lbl">Distance Traveled</div>
+            </div>
+            <div class="passport-stat-box">
+              <div class="stat-box-val" id="passportContinents">0 / 7</div>
+              <div class="stat-box-lbl">Continents Explored</div>
+            </div>
+            <div class="passport-stat-box">
+              <div class="stat-box-val" id="passportSpeed">--</div>
+              <div class="stat-box-lbl">Fastest Move</div>
+            </div>
+          </div>
+          <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-dim); margin-top: 4px;">Earned Expedition Badges:</div>
+          <div class="passport-badges-row" id="passportBadges"></div>
+        </div>
+
+        <button id="playAgainBtn" onclick="playAgain()" class="play-again-btn" aria-label="Play again">
+          <span>🔄 Play Again</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Rules / How-to-Play Modal -->
+    <div id="rulesModal" class="modal">
+      <div class="modal-content" style="max-width: 560px;">
+        <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; margin-bottom: 12px; color: #fff;">🌍 How to Play Atlas</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Master the classic travel word-chain game with global multiplayer rules:</p>
+        
+        <div class="rules-list">
+          <div class="rule-item">
+            <div class="rule-num">1</div>
+            <div><strong>Chain the Letters:</strong> Each player must submit a geographical place that begins with the <em>last letter</em> of the previous place (e.g. Pari<strong>s</strong> ➔ <strong>S</strong>ingapor<strong>e</strong> ➔ <strong>E</strong>gyp<strong>t</strong>).</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">2</div>
+            <div><strong>Broad Geography:</strong> Any country, major city, continent, ocean, sea, mountain range, island, or Indian state/river/lake is accepted!</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">3</div>
+            <div><strong>No Repetitions:</strong> A place cannot be used more than once in the same round.</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">4</div>
+            <div><strong>Speed = Maximum Points:</strong> You have 20 seconds. Answering within 5 seconds awards up to <strong>200 points</strong>! Running out of time eliminates you from the round.</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">5</div>
+            <div><strong>Tactical Lifelines:</strong> Use your <strong>💡 Hint Token</strong> for clues or <strong>🎲 Pass Ticket</strong> to avoid elimination on brutal letters!</div>
+          </div>
+        </div>
+
+        <button class="btn-close-modal" onclick="closeRulesModal()">Got It, Let's Play!</button>
+      </div>
+    </div>
+
     <div id="imageModal" class="modal">
       <div class="modal-content">
         <p id="imageModalMessage">Loading image...</p>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("winnerModal").style.display = "none";
-      document.getElementById("imageModal").style.display = "none";
-    });
-  </script>
+  <script src="three.min.js"></script>
+  <script src="geo-data.js"></script>
+  <script src="globe.js"></script>
   <script src="client.js"></script>
 </body>
 </html>
